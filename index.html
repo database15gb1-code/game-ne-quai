@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Né Quái - Minecraft Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101827;color:#fff;font-family:Arial,sans-serif;text-align:center}
+.wrap{max-width:760px;margin:20px auto;padding:12px}.top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+canvas{width:100%;max-width:720px;border:2px solid #394968;border-radius:12px;background:#18243a;touch-action:none}
+button{font-size:20px;padding:12px 22px;margin:8px 4px;border:0;border-radius:10px;cursor:pointer}
+#start{background:#67d36b} .move{background:#dce6f5}
+.small{opacity:.75;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🎮 Né Quái</h1>
+<div class="top"><b>Điểm: <span id="score">0</span></b><b>❤️ Máu: <span id="hp">3</span></b></div>
+<canvas id="game" width="720" height="420"></canvas>
+<div><button id="start">▶ Bắt đầu</button></div>
+<div><button class="move" id="left">←</button><button class="move" id="right">→</button></div>
+<p class="small">PC: dùng ← → hoặc A/D. Điện thoại: giữ nút ← →.</p>
+</div>
+<script>
+const c=document.getElementById("game"),x=c.getContext("2d");
+const scoreEl=document.getElementById("score"),hpEl=document.getElementById("hp");
+let p,enemies,score,hp,running=false,last,spawn,keys={},raf;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function reset(){p={x:360,y:365,w:42,h:24,s:320};enemies=[];score=0;hp=3;spawn=0;scoreEl.textContent=0;hpEl.textContent=3;draw();}
+function draw(){
+ x.clearRect(0,0,720,420);x.fillStyle="#18243a";x.fillRect(0,0,720,420);
+ x.fillStyle="#22324d";for(let i=0;i<14;i++)x.fillRect(i*60,0,1,420);
+ x.fillStyle="#4d7c59";x.fillRect(0,395,720,25);
+ x.fillStyle="#77b255";x.fillRect(p.x-p.w/2,p.y-p.h/2,p.w,p.h);
+ x.fillStyle="#fff";x.fillRect(p.x-12,p.y-5,7,7);x.fillRect(p.x+5,p.y-5,7,7);
+ enemies.forEach(e=>{x.fillStyle="#d94f4f";x.fillRect(e.x-e.s/2,e.y-e.s/2,e.s,e.s);x.fillStyle="#111";x.fillRect(e.x-9,e.y-7,6,6);x.fillRect(e.x+3,e.y-7,6,6)});
+ x.fillStyle="#fff";x.font="16px Arial";x.fillText("Né quái càng lâu càng nhiều điểm!",18,28);
+}
+function hit(a,b){return Math.abs(a.x-b.x)<(a.w+b.s)/2&&Math.abs(a.y-b.y)<(a.h+b.s)/2}
+function loop(now){
+ if(!running)return;let dt=Math.min(.033,(now-last)/1000);last=now;
+ if(keys.left||keys.a)p.x-=p.s*dt;if(keys.right||keys.d)p.x+=p.s*dt;p.x=clamp(p.x,25,695);
+ spawn-=dt;
+ if(spawn<=0){enemies.push({x:30+Math.random()*660,y:-25,s:28+Math.random()*18,v:100+Math.random()*100+score*2});spawn=Math.max(.25,.75-score*.006)}
+ for(let i=enemies.length-1;i>=0;i--){let e=enemies[i];e.y+=e.v*dt;
+  if(hit(p,e)){enemies.splice(i,1);hp--;hpEl.textContent=hp;if(hp<=0){running=false;alert("Game Over! Điểm: "+score);return}}
+  else if(e.y>445){enemies.splice(i,1);score++;scoreEl.textContent=score}
+ }
+ draw();raf=requestAnimationFrame(loop)
+}
+function start(){cancelAnimationFrame(raf);reset();running=true;last=performance.now();raf=requestAnimationFrame(loop)}
+document.getElementById("start").onclick=start;
+function hold(id,k){let b=document.getElementById(id);b.onpointerdown=()=>keys[k]=true;b.onpointerup=()=>keys[k]=false;b.onpointerleave=()=>keys[k]=false}
+hold("left","left");hold("right","right");
+onkeydown=e=>{if(e.key==="ArrowLeft")keys.left=true;if(e.key==="ArrowRight")keys.right=true;if(e.key.toLowerCase()==="a")keys.a=true;if(e.key.toLowerCase()==="d")keys.d=true};
+onkeyup=e=>{if(e.key==="ArrowLeft")keys.left=false;if(e.key==="ArrowRight")keys.right=false;if(e.key.toLowerCase()==="a")keys.a=false;if(e.key.toLowerCase()==="d")keys.d=false};
+reset();
+</script>
+</body>
+</html>
