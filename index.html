@@ -1,7 +1,9 @@
+
 <!doctype html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
+
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
@@ -22,7 +24,7 @@ html,body{
 
 body{
     background:#101827;
-    color:white;
+    color:#fff;
     font-family:Arial,sans-serif;
     text-align:center;
     overflow-x:hidden;
@@ -37,7 +39,7 @@ body{
 }
 
 h1{
-    margin:5px 0 8px;
+    margin:6px 0 8px;
     font-size:28px;
 }
 
@@ -45,7 +47,7 @@ h1{
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:10px;
+    gap:8px;
     flex-wrap:wrap;
     margin-bottom:8px;
     font-size:15px;
@@ -53,8 +55,9 @@ h1{
 
 .info{
     background:#1d2a42;
-    border-radius:8px;
-    padding:6px 10px;
+    border:1px solid #33476b;
+    border-radius:10px;
+    padding:7px 10px;
 }
 
 canvas{
@@ -88,7 +91,7 @@ button{
     font-size:18px;
     font-weight:bold;
     padding:12px 28px;
-    margin:8px 0;
+    margin:10px 0;
 }
 
 #start:active{
@@ -99,27 +102,30 @@ button{
     display:flex;
     justify-content:center;
     align-items:center;
-    gap:18px;
-    margin-top:3px;
+    gap:20px;
+    margin-top:4px;
 }
 
 .move{
-    width:100px;
-    height:72px;
+    width:110px;
+    height:78px;
+
     background:#e1e9f5;
     color:#172238;
-    font-size:38px;
+
+    font-size:42px;
     font-weight:bold;
-    box-shadow:0 4px 0 #9eacbf;
+
+    box-shadow:0 5px 0 #9eacbf;
 }
 
 .move:active{
-    transform:translateY(3px);
+    transform:translateY(4px);
     box-shadow:0 1px 0 #9eacbf;
 }
 
 .small{
-    margin:7px 0;
+    margin:8px 0;
     opacity:.7;
     font-size:13px;
 }
@@ -132,9 +138,9 @@ button{
 
     transform:
         translate(-50%,-50%)
-        scale(.45);
+        scale(.4);
 
-    width:95%;
+    width:96%;
 
     font-size:clamp(27px,7vw,60px);
 
@@ -142,13 +148,11 @@ button{
 
     text-align:center;
 
-    white-space:normal;
-
     opacity:0;
 
     pointer-events:none;
 
-    z-index:999;
+    z-index:9999;
 
     text-shadow:
         0 4px 0 #000,
@@ -166,7 +170,7 @@ button{
         opacity:0;
         transform:
             translate(-50%,-50%)
-            scale(.45);
+            scale(.4);
     }
 
     12%{
@@ -210,14 +214,13 @@ button{
     }
 
     .move{
-        width:105px;
-        height:75px;
-        font-size:40px;
+        width:110px;
+        height:78px;
+        font-size:42px;
     }
 }
 </style>
 </head>
-
 
 <body>
 
@@ -249,35 +252,27 @@ button{
 
 </div>
 
-
 <canvas
     id="game"
     width="720"
     height="420">
 </canvas>
 
-
 <button id="start">
-    ▶ Bắt đầu
+    🔄 Chơi lại
 </button>
-
 
 <div class="controls">
 
-    <button
-        class="move"
-        id="left">
+    <button class="move" id="left">
         ⬅️
     </button>
 
-    <button
-        class="move"
-        id="right">
+    <button class="move" id="right">
         ➡️
     </button>
 
 </div>
-
 
 <p class="small">
     📱 Điện thoại: giữ ⬅️ ➡️ để di chuyển<br>
@@ -286,68 +281,88 @@ button{
 
 </div>
 
-
 <div id="message"></div>
 
 
 <script>
-
 "use strict";
 
-
-/* =========================================================
+/* =====================================================
    CANVAS
-========================================================= */
+===================================================== */
 
-const canvas =
-    document.getElementById("game");
-
-const ctx =
-    canvas.getContext("2d");
-
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
 const W = 720;
 const H = 420;
 
 
-/* =========================================================
+/* =====================================================
    UI
-========================================================= */
+===================================================== */
 
-const scoreEl =
-    document.getElementById("score");
-
-const bestEl =
-    document.getElementById("best");
-
-const hpEl =
-    document.getElementById("hp");
-
-const skillEl =
-    document.getElementById("skill");
-
-const messageEl =
-    document.getElementById("message");
+const scoreEl = document.getElementById("score");
+const bestEl = document.getElementById("best");
+const hpEl = document.getElementById("hp");
+const skillEl = document.getElementById("skill");
+const messageEl = document.getElementById("message");
+const startButton = document.getElementById("start");
 
 
-/* =========================================================
-   KỶ LỤC
-========================================================= */
+/* =====================================================
+   LOCAL STORAGE AN TOÀN
+===================================================== */
 
-let bestScore =
-    Number(
-        localStorage.getItem("neQuaiBest") || 0
-    );
+function loadBest(){
 
-bestEl.textContent =
-    bestScore;
+    try{
+
+        const value =
+            Number(
+                localStorage.getItem("neQuaiBest")
+            );
+
+        return Number.isFinite(value)
+            ? value
+            : 0;
+
+    }catch(error){
+
+        return 0;
+    }
+}
 
 
-/* =========================================================
-   GAME VARIABLES
-========================================================= */
+function saveBest(value){
 
-let player;
+    try{
+
+        localStorage.setItem(
+            "neQuaiBest",
+            String(value)
+        );
+
+    }catch(error){
+
+        /*
+           Nếu trình duyệt chặn localStorage
+           game vẫn tiếp tục chạy bình thường.
+        */
+    }
+}
+
+
+let bestScore = loadBest();
+
+bestEl.textContent = bestScore;
+
+
+/* =====================================================
+   GAME OBJECTS
+===================================================== */
+
+let player = null;
 
 let enemies = [];
 let bombs = [];
@@ -356,9 +371,9 @@ let bullets = [];
 let particles = [];
 
 
-/* =========================================================
+/* =====================================================
    GAME STATE
-========================================================= */
+===================================================== */
 
 let score = 0;
 let hp = 3;
@@ -366,67 +381,61 @@ let hp = 3;
 let running = false;
 
 let lastTime = 0;
-
 let animationId = 0;
 
+let restartTimer = null;
 
-/* =========================================================
+
+/* =====================================================
    SPAWN TIMER
-========================================================= */
+===================================================== */
 
-let enemyTimer = 0.5;
+let enemyTimer = .5;
 let bombTimer = 5;
 let fruitTimer = 6;
-let shootTimer = 0;
+let shootTimer = .3;
 
 
-/* =========================================================
+/* =====================================================
    SKILL
-========================================================= */
+===================================================== */
 
 let currentSkill = "Không";
-
 let skillTime = 0;
 
 
-/* =========================================================
+/* =====================================================
    MỐC ĐIỂM
-========================================================= */
+===================================================== */
 
 let reached200 = false;
 let reached500 = false;
 
 
-/* =========================================================
+/* =====================================================
    ĐIỀU KHIỂN
-========================================================= */
+===================================================== */
 
 const keys = {
-
     left:false,
-
     right:false
 };
 
 
-/* =========================================================
-   GIỚI HẠN ĐỂ CHỐNG LAG
-========================================================= */
+/* =====================================================
+   GIỚI HẠN CHỐNG LAG
+===================================================== */
 
 const MAX_ENEMIES = 18;
-
 const MAX_BOMBS = 3;
-
 const MAX_FRUITS = 3;
-
 const MAX_BULLETS = 24;
-
 const MAX_PARTICLES = 75;
 
 
-/* =========================================================
-   RESET
-========================================================= */
+/* =====================================================
+   RESET GAME
+===================================================== */
 
 function resetGame(){
 
@@ -441,54 +450,46 @@ function resetGame(){
         height:25,
 
         speed:330
-
     };
 
 
     enemies.length = 0;
-
     bombs.length = 0;
-
     fruits.length = 0;
-
     bullets.length = 0;
-
     particles.length = 0;
 
 
     score = 0;
-
     hp = 3;
 
 
     enemyTimer = .5;
-
     bombTimer = 5;
-
     fruitTimer = 6;
-
     shootTimer = .3;
 
 
     currentSkill = "Không";
-
     skillTime = 0;
 
 
     reached200 = false;
-
     reached500 = false;
 
 
-    updateUI();
+    keys.left = false;
+    keys.right = false;
 
+
+    updateUI();
     draw();
 }
 
 
-/* =========================================================
+/* =====================================================
    UI
-========================================================= */
+===================================================== */
 
 function updateUI(){
 
@@ -500,8 +501,7 @@ function updateUI(){
 
     if(currentSkill === "Không"){
 
-        skillEl.textContent =
-            "Không";
+        skillEl.textContent = "Không";
 
     }else{
 
@@ -511,13 +511,12 @@ function updateUI(){
             Math.ceil(skillTime) +
             "s";
     }
-
 }
 
 
-/* =========================================================
+/* =====================================================
    MESSAGE
-========================================================= */
+===================================================== */
 
 function showMessage(text){
 
@@ -525,16 +524,15 @@ function showMessage(text){
 
     void messageEl.offsetWidth;
 
-    messageEl.textContent =
-        text;
+    messageEl.textContent = text;
 
     messageEl.classList.add("show");
 }
 
 
-/* =========================================================
+/* =====================================================
    SCORE
-========================================================= */
+===================================================== */
 
 function updateScore(){
 
@@ -542,27 +540,26 @@ function updateScore(){
         Math.floor(score);
 
 
-    scoreEl.textContent =
-        current;
+    scoreEl.textContent = current;
 
 
-    /* LƯU KỶ LỤC */
+    /*
+       LƯU KỶ LỤC
+    */
 
     if(current > bestScore){
 
         bestScore = current;
 
-        localStorage.setItem(
-            "neQuaiBest",
-            bestScore
-        );
+        saveBest(bestScore);
 
-        bestEl.textContent =
-            bestScore;
+        bestEl.textContent = bestScore;
     }
 
 
-    /* 200 ĐIỂM */
+    /*
+       200 ĐIỂM
+    */
 
     if(
         current >= 200 &&
@@ -577,7 +574,9 @@ function updateScore(){
     }
 
 
-    /* 500 ĐIỂM */
+    /*
+       500 ĐIỂM
+    */
 
     if(
         current >= 500 &&
@@ -590,17 +589,16 @@ function updateScore(){
             "😳 Ơ HAY, THẰNG NÀY GIỎI THẾ!"
         );
     }
-
 }
 
 
-/* =========================================================
-   PARTICLE
-========================================================= */
+/* =====================================================
+   PARTICLES
+===================================================== */
 
 function createParticles(
-    px,
-    py,
+    x,
+    y,
     amount = 8
 ){
 
@@ -611,7 +609,7 @@ function createParticles(
     const count =
         Math.min(
             amount,
-            available
+            Math.max(0,available)
         );
 
 
@@ -619,29 +617,27 @@ function createParticles(
 
         particles.push({
 
-            x:px,
+            x:x,
 
-            y:py,
+            y:y,
 
             vx:
-                (Math.random()-.5) *
-                180,
+                (Math.random()-.5)*180,
 
             vy:
-                (Math.random()-.5) *
-                180,
+                (Math.random()-.5)*180,
 
             life:
-                .3 +
+                .25 +
                 Math.random()*.35
         });
     }
 }
 
 
-/* =========================================================
-   COLLISION PLAYER - ENEMY
-========================================================= */
+/* =====================================================
+   PLAYER - ENEMY COLLISION
+===================================================== */
 
 function enemyHitsPlayer(e){
 
@@ -649,31 +645,39 @@ function enemyHitsPlayer(e){
 
         Math.abs(
             player.x - e.x
-        ) <
-
-        (
-            player.width / 2 +
-            e.size / 2
         )
 
-    ) && (
+        <
+
+        (
+            player.width/2 +
+            e.size/2
+        )
+
+    )
+
+    &&
+
+    (
 
         Math.abs(
             player.y - e.y
-        ) <
+        )
+
+        <
 
         (
-            player.height / 2 +
-            e.size / 2
+            player.height/2 +
+            e.size/2
         )
     );
 }
 
 
-/* =========================================================
+/* =====================================================
    SPAWN ENEMY
    QUÁI RƠI TỪ TRÊN XUỐNG
-========================================================= */
+===================================================== */
 
 function spawnEnemy(){
 
@@ -705,15 +709,13 @@ function spawnEnemy(){
             speed:155,
             hp:1
         }
-
     ];
 
 
     const type =
         types[
             Math.floor(
-                Math.random() *
-                types.length
+                Math.random()*types.length
             )
         ];
 
@@ -723,7 +725,7 @@ function spawnEnemy(){
         x:
             25 +
             Math.random() *
-            (W - 50),
+            (W-50),
 
         y:-35,
 
@@ -732,7 +734,7 @@ function spawnEnemy(){
         speed:
             type.speed +
             Math.min(
-                score * .35,
+                score*.35,
                 100
             ),
 
@@ -745,9 +747,9 @@ function spawnEnemy(){
 }
 
 
-/* =========================================================
-   SPAWN BOMB
-========================================================= */
+/* =====================================================
+   BOM
+===================================================== */
 
 function spawnBomb(){
 
@@ -765,7 +767,7 @@ function spawnBomb(){
         x:
             25 +
             Math.random() *
-            (W - 50),
+            (W-50),
 
         y:-30,
 
@@ -778,9 +780,9 @@ function spawnBomb(){
 }
 
 
-/* =========================================================
-   SPAWN FRUIT
-========================================================= */
+/* =====================================================
+   FRUIT
+===================================================== */
 
 function spawnFruit(){
 
@@ -793,21 +795,21 @@ function spawnFruit(){
     }
 
 
+    const random =
+        Math.random();
+
+
     /*
-       🌈 CẦU VỒNG
-       0.1%
+       🌈 0.1%
     */
 
-    if(
-        Math.random() < .001
-    ){
+    if(random < .001){
 
         fruits.push({
 
             x:
                 25 +
-                Math.random() *
-                (W - 50),
+                Math.random()*(W-50),
 
             y:-25,
 
@@ -821,20 +823,16 @@ function spawnFruit(){
 
 
     /*
-       ❤️ HỒI HP
-       0.1%
+       ❤️ 0.1%
     */
 
-    if(
-        Math.random() < .001
-    ){
+    if(random < .002){
 
         fruits.push({
 
             x:
                 25 +
-                Math.random() *
-                (W - 50),
+                Math.random()*(W-50),
 
             y:-25,
 
@@ -848,15 +846,14 @@ function spawnFruit(){
 
 
     /*
-       🍎 FRUIT SKILL THƯỜNG
+       🍎 SKILL
     */
 
     fruits.push({
 
         x:
             25 +
-            Math.random() *
-            (W - 50),
+            Math.random()*(W-50),
 
         y:-25,
 
@@ -867,22 +864,17 @@ function spawnFruit(){
 }
 
 
-/* =========================================================
-   SKILL
-========================================================= */
+/* =====================================================
+   SKILLS
+===================================================== */
 
 const skillList = [
 
     "🔥 Phun lửa",
-
     "⚡ Tia điện",
-
     "❄️ Tia băng",
-
     "🔫 Bắn nhanh",
-
     "🛡️ Khiên",
-
     "🔆 Laser"
 ];
 
@@ -901,18 +893,15 @@ function giveRandomSkill(){
     skillTime = 15;
 
 
-    showMessage(
-        currentSkill
-    );
-
+    showMessage(currentSkill);
 
     updateUI();
 }
 
 
-/* =========================================================
+/* =====================================================
    KILL ENEMY
-========================================================= */
+===================================================== */
 
 function killEnemy(index){
 
@@ -925,8 +914,7 @@ function killEnemy(index){
     }
 
 
-    const e =
-        enemies[index];
+    const e = enemies[index];
 
 
     createParticles(
@@ -936,24 +924,21 @@ function killEnemy(index){
     );
 
 
-    enemies.splice(
-        index,
-        1
-    );
+    enemies.splice(index,1);
 
 
     score += 3;
 }
 
 
-/* =========================================================
+/* =====================================================
    DAMAGE PLAYER
-========================================================= */
+===================================================== */
 
 function damagePlayer(){
 
     /*
-       KHIÊN CHẶN DAMAGE
+       KHIÊN
     */
 
     if(
@@ -961,14 +946,26 @@ function damagePlayer(){
         "🛡️ Khiên"
     ){
 
+        createParticles(
+            player.x,
+            player.y,
+            4
+        );
+
         return;
     }
 
 
     hp--;
 
-    hpEl.textContent =
-        hp;
+    hpEl.textContent = hp;
+
+
+    createParticles(
+        player.x,
+        player.y,
+        8
+    );
 
 
     if(hp <= 0){
@@ -978,59 +975,58 @@ function damagePlayer(){
 }
 
 
-/* =========================================================
+/* =====================================================
    GAME OVER
-========================================================= */
+===================================================== */
 
 function gameOver(){
 
-    if(!running)
+    if(!running){
         return;
+    }
 
 
     running = false;
 
 
+    cancelAnimationFrame(
+        animationId
+    );
+
+
     updateScore();
 
 
-    /*
-       CHỜ 1.5 GIÂY
-       RỒI TỰ CHƠI LẠI
-    */
-
     showMessage(
-        score >= 500
-        ?
-        "😳 Ơ HAY, THẰNG NÀY GIỎI THẾ!"
-        :
         "💀 HẾT MÁU!"
     );
 
 
-    setTimeout(
+    /*
+       TỰ ĐỘNG CHƠI LẠI
+    */
 
-        () => {
+    clearTimeout(restartTimer);
 
-            startGame();
 
-        },
+    restartTimer =
+        setTimeout(
+            () => {
 
-        1600
-    );
+                startGame();
+
+            },
+            1600
+        );
 }
 
 
-/* =========================================================
+/* =====================================================
    PLAYER
    CHỈ TRÁI / PHẢI
-========================================================= */
+===================================================== */
 
 function updatePlayer(dt){
-
-    /*
-       ⬅️
-    */
 
     if(keys.left){
 
@@ -1039,10 +1035,6 @@ function updatePlayer(dt){
     }
 
 
-    /*
-       ➡️
-    */
-
     if(keys.right){
 
         player.x +=
@@ -1050,15 +1042,13 @@ function updatePlayer(dt){
     }
 
 
-    /*
-       GIỚI HẠN MÀN HÌNH
-    */
-
     player.x =
         Math.max(
+
             player.width/2,
 
             Math.min(
+
                 W -
                 player.width/2,
 
@@ -1068,18 +1058,15 @@ function updatePlayer(dt){
 }
 
 
-/* =========================================================
-   UPDATE ENEMY
-========================================================= */
+/* =====================================================
+   ENEMY UPDATE
+===================================================== */
 
 function updateEnemies(dt){
 
     for(
-        let i =
-            enemies.length - 1;
-
-        i >= 0;
-
+        let i=enemies.length-1;
+        i>=0;
         i--
     ){
 
@@ -1088,7 +1075,7 @@ function updateEnemies(dt){
 
 
         /*
-           BĂNG
+           ĐANG ĐÓNG BĂNG
         */
 
         if(e.frozen > 0){
@@ -1097,18 +1084,13 @@ function updateEnemies(dt){
 
         }else{
 
-            /*
-               QUÁI CHỈ RƠI XUỐNG
-               KHÔNG ĐUỔI PLAYER
-            */
-
             e.y +=
                 e.speed * dt;
         }
 
 
         /*
-           VA CHẠM PLAYER
+           ĐỤNG PLAYER
         */
 
         if(
@@ -1130,44 +1112,40 @@ function updateEnemies(dt){
 
             damagePlayer();
 
-            if(!running)
+
+            if(!running){
                 return;
+            }
+
 
             continue;
         }
 
 
         /*
-           QUÁI RA NGOÀI
+           RA KHỎI MÀN
         */
 
         if(
-            e.y >
-            H + 50
+            e.y > H+50
         ){
 
-            enemies.splice(
-                i,
-                1
-            );
+            enemies.splice(i,1);
         }
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    BOM
-   CHỈ DAMAGE PLAYER
-========================================================= */
+   CHỈ GÂY DAMAGE PLAYER
+===================================================== */
 
 function updateBombs(dt){
 
     for(
-        let i =
-            bombs.length - 1;
-
-        i >= 0;
-
+        let i=bombs.length-1;
+        i>=0;
         i--
     ){
 
@@ -1176,14 +1154,13 @@ function updateBombs(dt){
 
 
         b.y +=
-            b.speed * dt;
+            b.speed*dt;
 
 
         /*
            QUAN TRỌNG:
 
-           KHÔNG CÓ CODE
-           KIỂM TRA BOM - QUÁI
+           KHÔNG KIỂM TRA BOM - QUÁI
 
            => BOM KHÔNG ẢNH HƯỞNG QUÁI
         */
@@ -1192,11 +1169,9 @@ function updateBombs(dt){
         const distance =
             Math.hypot(
 
-                b.x -
-                player.x,
+                b.x-player.x,
 
-                b.y -
-                player.y
+                b.y-player.y
             );
 
 
@@ -1206,7 +1181,7 @@ function updateBombs(dt){
 
         if(
             distance <
-            b.radius + 20
+            b.radius+20
         ){
 
             createParticles(
@@ -1219,50 +1194,37 @@ function updateBombs(dt){
             damagePlayer();
 
 
-            bombs.splice(
-                i,
-                1
-            );
+            bombs.splice(i,1);
 
 
-            if(!running)
+            if(!running){
                 return;
+            }
 
 
             continue;
         }
 
 
-        /*
-           BOM RA KHỎI MÀN
-        */
-
         if(
-            b.y >
-            H + 50
+            b.y > H+50
         ){
 
-            bombs.splice(
-                i,
-                1
-            );
+            bombs.splice(i,1);
         }
     }
 }
 
 
-/* =========================================================
-   FRUITS
-========================================================= */
+/* =====================================================
+   FRUIT UPDATE
+===================================================== */
 
 function updateFruits(dt){
 
     for(
-        let i =
-            fruits.length - 1;
-
-        i >= 0;
-
+        let i=fruits.length-1;
+        i>=0;
         i--
     ){
 
@@ -1271,29 +1233,27 @@ function updateFruits(dt){
 
 
         f.y +=
-            f.speed * dt;
+            f.speed*dt;
 
 
         /*
-           ĂN TRÁI CÂY
+           ĂN TRÁI
         */
 
         if(
 
             Math.hypot(
 
-                f.x -
-                player.x,
+                f.x-player.x,
 
-                f.y -
-                player.y
+                f.y-player.y
 
             ) < 35
 
         ){
 
             /*
-               🌈 CẦU VỒNG
+               🌈
             */
 
             if(
@@ -1304,8 +1264,7 @@ function updateFruits(dt){
                 currentSkill =
                     "🌈 7 Sắc";
 
-                skillTime =
-                    25;
+                skillTime = 25;
 
                 showMessage(
                     "🌈 7 SẮC CẦU VỒNG!"
@@ -1314,7 +1273,7 @@ function updateFruits(dt){
 
 
             /*
-               ❤️ HP
+               ❤️
             */
 
             else if(
@@ -1325,7 +1284,7 @@ function updateFruits(dt){
                 hp =
                     Math.min(
                         3,
-                        hp + 1
+                        hp+1
                     );
 
                 hpTextUpdate();
@@ -1337,7 +1296,7 @@ function updateFruits(dt){
 
 
             /*
-               🍎 SKILL
+               🍎
             */
 
             else{
@@ -1346,47 +1305,35 @@ function updateFruits(dt){
             }
 
 
-            fruits.splice(
-                i,
-                1
-            );
+            fruits.splice(i,1);
 
             continue;
         }
 
 
-        /*
-           RA NGOÀI
-        */
-
         if(
-            f.y >
-            H + 40
+            f.y > H+40
         ){
 
-            fruits.splice(
-                i,
-                1
-            );
+            fruits.splice(i,1);
         }
     }
 }
 
 
-/* =========================================================
-   HP UI
-========================================================= */
+/* =====================================================
+   HP
+===================================================== */
 
 function hpTextUpdate(){
 
-    hpEl.textContent =
-        hp;
+    hpEl.textContent = hp;
 }
 
 
-/* =========================================================
+/* =====================================================
    SHOOT
-========================================================= */
+===================================================== */
 
 function shoot(){
 
@@ -1401,11 +1348,9 @@ function shoot(){
 
     bullets.push({
 
-        x:
-            player.x,
+        x:player.x,
 
-        y:
-            player.y - 22,
+        y:player.y-22,
 
         speed:440,
 
@@ -1414,18 +1359,15 @@ function shoot(){
 }
 
 
-/* =========================================================
+/* =====================================================
    BULLETS
-========================================================= */
+===================================================== */
 
 function updateBullets(dt){
 
     for(
-        let i =
-            bullets.length - 1;
-
-        i >= 0;
-
+        let i=bullets.length-1;
+        i>=0;
         i--
     ){
 
@@ -1434,41 +1376,22 @@ function updateBullets(dt){
 
 
         b.y -=
-            b.speed * dt;
+            b.speed*dt;
 
-
-        /*
-           RA NGOÀI
-        */
 
         if(
-            b.y <
-            -30
+            b.y < -30
         ){
 
-            bullets.splice(
-                i,
-                1
-            );
+            bullets.splice(i,1);
 
             continue;
         }
 
 
-        /*
-           ĐỤNG QUÁI
-        */
-
-        let hitEnemy =
-            false;
-
-
         for(
-            let j =
-                enemies.length - 1;
-
-            j >= 0;
-
+            let j=enemies.length-1;
+            j>=0;
             j--
         ){
 
@@ -1480,20 +1403,21 @@ function updateBullets(dt){
 
                 Math.hypot(
 
-                    b.x -
-                    e.x,
+                    b.x-e.x,
 
-                    b.y -
-                    e.y
+                    b.y-e.y
 
-                ) <
+                )
 
-                b.radius +
+                <
+
+                b.radius+
                 e.size/2
 
             ){
 
                 e.hp--;
+
 
                 createParticles(
                     e.x,
@@ -1502,36 +1426,27 @@ function updateBullets(dt){
                 );
 
 
-                bullets.splice(
-                    i,
-                    1
-                );
+                bullets.splice(i,1);
 
 
                 if(
-                    e.hp <= 0
+                    e.hp<=0
                 ){
 
                     killEnemy(j);
                 }
 
 
-                hitEnemy = true;
-
                 break;
             }
         }
-
-
-        if(hitEnemy)
-            continue;
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    SKILL ATTACK
-========================================================= */
+===================================================== */
 
 function useSkill(dt){
 
@@ -1554,11 +1469,8 @@ function useSkill(dt){
     ){
 
         for(
-            let i =
-                enemies.length - 1;
-
-            i >= 0;
-
+            let i=enemies.length-1;
+            i>=0;
             i--
         ){
 
@@ -1571,12 +1483,10 @@ function useSkill(dt){
                 e.y < player.y &&
 
                 Math.abs(
-                    e.x -
-                    player.x
+                    e.x-player.x
                 ) < 120 &&
 
-                player.y -
-                e.y < 230
+                player.y-e.y < 230
 
             ){
 
@@ -1587,7 +1497,7 @@ function useSkill(dt){
 
 
     /*
-       ⚡ TIA ĐIỆN
+       ⚡ ĐIỆN
     */
 
     if(
@@ -1596,11 +1506,8 @@ function useSkill(dt){
     ){
 
         for(
-            let i =
-                enemies.length - 1;
-
-            i >= 0;
-
+            let i=enemies.length-1;
+            i>=0;
             i--
         ){
 
@@ -1613,8 +1520,7 @@ function useSkill(dt){
                 e.y < player.y &&
 
                 Math.abs(
-                    e.x -
-                    player.x
+                    e.x-player.x
                 ) < 95
 
             ){
@@ -1626,13 +1532,13 @@ function useSkill(dt){
 
 
     /*
-       ❄️ TIA BĂNG
+       ❄️ BĂNG
 
-       Bước 1:
-       Đóng băng
+       Đầu tiên đóng băng.
 
-       Bước 2:
-       Sau đó giết
+       Sau đó đếm ngược.
+
+       Cuối cùng tiêu diệt.
     */
 
     if(
@@ -1649,8 +1555,7 @@ function useSkill(dt){
                 e.y < player.y &&
 
                 Math.abs(
-                    e.x -
-                    player.x
+                    e.x-player.x
                 ) < 90 &&
 
                 e.frozen <= 0 &&
@@ -1661,22 +1566,14 @@ function useSkill(dt){
 
                 e.frozen = 1.2;
 
-                e.freezeKillTimer =
-                    .55;
+                e.freezeKillTimer = .65;
             }
         }
 
 
-        /*
-           giảm timer giết
-        */
-
         for(
-            let i =
-                enemies.length - 1;
-
-            i >= 0;
-
+            let i=enemies.length-1;
+            i>=0;
             i--
         ){
 
@@ -1688,8 +1585,7 @@ function useSkill(dt){
                 e.freezeKillTimer > 0
             ){
 
-                e.freezeKillTimer -=
-                    dt;
+                e.freezeKillTimer -= dt;
 
 
                 if(
@@ -1710,7 +1606,9 @@ function useSkill(dt){
     if(
 
         currentSkill ===
-        "🔆 Laser" ||
+        "🔆 Laser"
+
+        ||
 
         currentSkill ===
         "🌈 7 Sắc"
@@ -1718,11 +1616,8 @@ function useSkill(dt){
     ){
 
         for(
-            let i =
-                enemies.length - 1;
-
-            i >= 0;
-
+            let i=enemies.length-1;
+            i>=0;
             i--
         ){
 
@@ -1735,8 +1630,7 @@ function useSkill(dt){
                 e.y < player.y &&
 
                 Math.abs(
-                    e.x -
-                    player.x
+                    e.x-player.x
                 ) < 22
 
             ){
@@ -1745,37 +1639,18 @@ function useSkill(dt){
             }
         }
     }
-
-
-    /*
-       🔫 BẮN NHANH
-    */
-
-    if(
-        currentSkill ===
-        "🔫 Bắn nhanh"
-    ){
-
-        /*
-           Bắn được xử lý
-           trong game loop
-        */
-    }
 }
 
 
-/* =========================================================
-   PARTICLES
-========================================================= */
+/* =====================================================
+   PARTICLES UPDATE
+===================================================== */
 
 function updateParticles(dt){
 
     for(
-        let i =
-            particles.length - 1;
-
-        i >= 0;
-
+        let i=particles.length-1;
+        i>=0;
         i--
     ){
 
@@ -1784,37 +1659,33 @@ function updateParticles(dt){
 
 
         p.x +=
-            p.vx * dt;
+            p.vx*dt;
 
         p.y +=
-            p.vy * dt;
+            p.vy*dt;
 
-        p.life -=
-            dt;
+        p.life -= dt;
 
-
-        /*
-           TỰ XÓA
-        */
 
         if(
             p.life <= 0
         ){
 
-            particles.splice(
-                i,
-                1
-            );
+            particles.splice(i,1);
         }
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    DRAW
-========================================================= */
+===================================================== */
 
 function draw(){
+
+    /*
+       BACKGROUND
+    */
 
     ctx.clearRect(
         0,
@@ -1823,10 +1694,6 @@ function draw(){
         H
     );
 
-
-    /*
-       BACKGROUND
-    */
 
     ctx.fillStyle =
         "#18243a";
@@ -1843,28 +1710,30 @@ function draw(){
        GRID
     */
 
-    ctx.fillStyle =
+    ctx.strokeStyle =
         "#22324d";
 
+    ctx.lineWidth = 1;
+
+
     for(
-        let i=0;
-
-        i<14;
-
-        i++
+        let x=0;
+        x<W;
+        x+=60
     ){
 
-        ctx.fillRect(
-            i*60,
-            0,
-            1,
-            H
-        );
+        ctx.beginPath();
+
+        ctx.moveTo(x,0);
+
+        ctx.lineTo(x,H);
+
+        ctx.stroke();
     }
 
 
     /*
-       ĐẤT
+       GROUND
     */
 
     ctx.fillStyle =
@@ -1882,43 +1751,49 @@ function draw(){
        PLAYER
     */
 
-    ctx.fillStyle =
-        "#77b255";
+    if(player){
 
-    ctx.fillRect(
-
-        player.x -
-        player.width/2,
-
-        player.y -
-        player.height/2,
-
-        player.width,
-
-        player.height
-    );
+        ctx.fillStyle =
+            "#77b255";
 
 
-    /*
-       MẮT
-    */
+        ctx.fillRect(
 
-    ctx.fillStyle =
-        "#fff";
+            player.x-
+            player.width/2,
 
-    ctx.fillRect(
-        player.x - 12,
-        player.y - 5,
-        7,
-        7
-    );
+            player.y-
+            player.height/2,
 
-    ctx.fillRect(
-        player.x + 5,
-        player.y - 5,
-        7,
-        7
-    );
+            player.width,
+
+            player.height
+        );
+
+
+        /*
+           MẮT
+        */
+
+        ctx.fillStyle =
+            "#fff";
+
+
+        ctx.fillRect(
+            player.x-12,
+            player.y-5,
+            7,
+            7
+        );
+
+
+        ctx.fillRect(
+            player.x+5,
+            player.y-5,
+            7,
+            7
+        );
+    }
 
 
     /*
@@ -1926,6 +1801,7 @@ function draw(){
     */
 
     if(
+        player &&
         currentSkill ===
         "🛡️ Khiên"
     ){
@@ -1950,23 +1826,52 @@ function draw(){
 
 
     /*
-       PHUN LỬA
+       🔥 LỬA
     */
 
     if(
+        player &&
         currentSkill ===
         "🔥 Phun lửa"
     ){
 
+        const gradient =
+            ctx.createRadialGradient(
+                player.x,
+                player.y-100,
+                10,
+                player.x,
+                player.y-100,
+                120
+            );
+
+
+        gradient.addColorStop(
+            0,
+            "rgba(255,220,50,.7)"
+        );
+
+        gradient.addColorStop(
+            .5,
+            "rgba(255,80,20,.3)"
+        );
+
+        gradient.addColorStop(
+            1,
+            "rgba(255,50,0,0)"
+        );
+
+
         ctx.fillStyle =
-            "rgba(255,100,20,.28)";
+            gradient;
+
 
         ctx.beginPath();
 
         ctx.arc(
             player.x,
-            player.y - 105,
-            100,
+            player.y-100,
+            120,
             0,
             Math.PI*2
         );
@@ -1976,16 +1881,17 @@ function draw(){
 
 
     /*
-       TIA ĐIỆN
+       ⚡ ĐIỆN
     */
 
     if(
+        player &&
         currentSkill ===
         "⚡ Tia điện"
     ){
 
         ctx.strokeStyle =
-            "#c084fc";
+            "#d78cff";
 
         ctx.lineWidth = 7;
 
@@ -2002,22 +1908,31 @@ function draw(){
         );
 
         ctx.stroke();
+
+
+        ctx.strokeStyle =
+            "#fff";
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
     }
 
 
     /*
-       TIA BĂNG
+       ❄️ BĂNG
     */
 
     if(
+        player &&
         currentSkill ===
         "❄️ Tia băng"
     ){
 
         ctx.strokeStyle =
-            "#6de8ff";
+            "#67e8ff";
 
-        ctx.lineWidth = 8;
+        ctx.lineWidth = 10;
 
         ctx.beginPath();
 
@@ -2033,6 +1948,7 @@ function draw(){
 
         ctx.stroke();
 
+
         ctx.strokeStyle =
             "#fff";
 
@@ -2043,23 +1959,32 @@ function draw(){
 
 
     /*
-       LASER
+       🔆 LASER / 🌈
     */
 
     if(
+        player &&
 
-        currentSkill ===
-        "🔆 Laser" ||
+        (
+            currentSkill ===
+            "🔆 Laser"
 
-        currentSkill ===
-        "🌈 7 Sắc"
+            ||
+
+            currentSkill ===
+            "🌈 7 Sắc"
+        )
 
     ){
 
         ctx.strokeStyle =
-            "#ff6cff";
+            currentSkill ===
+            "🌈 7 Sắc"
+            ? "#ff55ff"
+            : "#ff55ff";
 
-        ctx.lineWidth = 15;
+
+        ctx.lineWidth = 16;
 
         ctx.beginPath();
 
@@ -2096,11 +2021,12 @@ function draw(){
         ctx.fillStyle =
             "#ffe66b";
 
+
         ctx.fillRect(
 
-            b.x - 3,
+            b.x-3,
 
-            b.y - 8,
+            b.y-8,
 
             6,
 
@@ -2117,21 +2043,23 @@ function draw(){
         const e of enemies
     ){
 
+        let enemyColor;
+
+
         /*
-           Bỏ màu đỏ như yêu cầu trước:
-           dùng màu xanh/tím/cam
+           KHÔNG DÙNG MÀU ĐỎ
         */
 
-        let enemyColor =
-            "#55c85a";
-
-
-        if(e.frozen > 0){
+        if(
+            e.frozen > 0
+        ){
 
             enemyColor =
                 "#66ddff";
 
-        }else if(e.hp >= 2){
+        }else if(
+            e.hp >= 2
+        ){
 
             enemyColor =
                 "#9b6cff";
@@ -2149,10 +2077,10 @@ function draw(){
 
         ctx.fillRect(
 
-            e.x -
+            e.x-
             e.size/2,
 
-            e.y -
+            e.y-
             e.size/2,
 
             e.size,
@@ -2168,23 +2096,24 @@ function draw(){
         ctx.fillStyle =
             "#111";
 
+
         ctx.fillRect(
-            e.x - 9,
-            e.y - 7,
+            e.x-9,
+            e.y-7,
             6,
             6
         );
 
         ctx.fillRect(
-            e.x + 3,
-            e.y - 7,
+            e.x+3,
+            e.y-7,
             6,
             6
         );
 
 
         /*
-           ĐÓNG BĂNG
+           BĂNG
         */
 
         if(
@@ -2192,23 +2121,22 @@ function draw(){
         ){
 
             ctx.strokeStyle =
-                "#d9faff";
+                "#e8fbff";
 
             ctx.lineWidth = 4;
 
+
             ctx.strokeRect(
 
-                e.x -
-                e.size/2 -
-                5,
+                e.x-
+                e.size/2-5,
 
-                e.y -
-                e.size/2 -
-                5,
+                e.y-
+                e.size/2-5,
 
-                e.size + 10,
+                e.size+10,
 
-                e.size + 10
+                e.size+10
             );
         }
     }
@@ -2224,6 +2152,7 @@ function draw(){
 
         ctx.fillStyle =
             "#242424";
+
 
         ctx.beginPath();
 
@@ -2241,12 +2170,13 @@ function draw(){
         ctx.fillStyle =
             "#ffb52e";
 
+
         ctx.fillRect(
 
-            b.x - 2,
+            b.x-2,
 
-            b.y -
-            b.radius -
+            b.y-
+            b.radius-
             7,
 
             4,
@@ -2257,7 +2187,7 @@ function draw(){
 
 
     /*
-       FRUITS
+       FRUIT
     */
 
     for(
@@ -2267,13 +2197,11 @@ function draw(){
         ctx.textAlign =
             "center";
 
-
         ctx.font =
             "27px Arial";
 
 
-        let icon =
-            "🍎";
+        let icon = "🍎";
 
 
         if(
@@ -2281,26 +2209,21 @@ function draw(){
             "rainbow"
         ){
 
-            icon =
-                "🌈";
+            icon = "🌈";
 
         }else if(
             f.type ===
             "heal"
         ){
 
-            icon =
-                "❤️";
+            icon = "❤️";
         }
 
 
         ctx.fillText(
-
             icon,
-
             f.x,
-
-            f.y + 9
+            f.y+9
         );
     }
 
@@ -2316,20 +2239,18 @@ function draw(){
         ctx.globalAlpha =
             Math.max(
                 0,
-                p.life / .65
+                p.life/.65
             );
+
 
         ctx.fillStyle =
             "#ffd166";
 
+
         ctx.fillRect(
-
             p.x,
-
             p.y,
-
             4,
-
             4
         );
     }
@@ -2339,11 +2260,11 @@ function draw(){
 
 
     /*
-       TEXT
+       HƯỚNG DẪN
     */
 
     ctx.fillStyle =
-        "#fff";
+        "rgba(255,255,255,.8)";
 
     ctx.font =
         "15px Arial";
@@ -2351,42 +2272,41 @@ function draw(){
     ctx.textAlign =
         "left";
 
+
     ctx.fillText(
-
         "Né quái càng lâu càng nhiều điểm!",
-
         15,
-
         25
     );
 }
 
 
-/* =========================================================
+/* =====================================================
    GAME LOOP
-========================================================= */
+===================================================== */
 
 function gameLoop(now){
 
-    if(!running)
+    if(!running){
         return;
+    }
 
 
     /*
-       Giới hạn dt
-       để tránh lỗi khi tab bị treo
+       CHỐNG DT QUÁ LỚN
     */
 
     const dt =
         Math.min(
             .033,
-            (now - lastTime) /
-            1000
+            Math.max(
+                0,
+                (now-lastTime)/1000
+            )
         );
 
 
-    lastTime =
-        now;
+    lastTime = now;
 
 
     /*
@@ -2400,28 +2320,19 @@ function gameLoop(now){
        SCORE
     */
 
-    score +=
-        dt;
-
+    score += dt;
 
     updateScore();
 
 
     /*
-       TIMER
+       TIMERS
     */
 
-    enemyTimer -=
-        dt;
-
-    bombTimer -=
-        dt;
-
-    fruitTimer -=
-        dt;
-
-    shootTimer -=
-        dt;
+    enemyTimer -= dt;
+    bombTimer -= dt;
+    fruitTimer -= dt;
+    shootTimer -= dt;
 
 
     /*
@@ -2433,8 +2344,7 @@ function gameLoop(now){
         "Không"
     ){
 
-        skillTime -=
-            dt;
+        skillTime -= dt;
 
 
         if(
@@ -2444,14 +2354,13 @@ function gameLoop(now){
             currentSkill =
                 "Không";
 
-            skillTime =
-                0;
+            skillTime = 0;
         }
     }
 
 
     /*
-       SPAWN QUÁI
+       QUÁI
     */
 
     if(
@@ -2468,7 +2377,7 @@ function gameLoop(now){
 
                 .72 -
                 Math.min(
-                    score / 500,
+                    score/500,
                     .35
                 )
             );
@@ -2476,7 +2385,7 @@ function gameLoop(now){
 
 
     /*
-       SPAWN BOM
+       BOM
     */
 
     if(
@@ -2493,7 +2402,7 @@ function gameLoop(now){
 
 
     /*
-       SPAWN FRUIT
+       FRUIT
     */
 
     if(
@@ -2510,11 +2419,10 @@ function gameLoop(now){
 
 
     /*
-       BẮN THƯỜNG
+       BẮN
     */
 
-    let fireRate =
-        .42;
+    let fireRate = .42;
 
 
     if(
@@ -2522,8 +2430,7 @@ function gameLoop(now){
         "🔫 Bắn nhanh"
     ){
 
-        fireRate =
-            .10;
+        fireRate = .10;
     }
 
 
@@ -2532,7 +2439,6 @@ function gameLoop(now){
     ){
 
         shoot();
-
 
         shootTimer =
             fireRate;
@@ -2547,19 +2453,21 @@ function gameLoop(now){
 
 
     /*
-       OBJECT UPDATE
+       UPDATE
     */
 
     updateEnemies(dt);
 
-    if(!running)
+    if(!running){
         return;
+    }
 
 
     updateBombs(dt);
 
-    if(!running)
+    if(!running){
         return;
+    }
 
 
     updateFruits(dt);
@@ -2570,17 +2478,12 @@ function gameLoop(now){
 
 
     /*
-       UI
-    */
-
-    updateUI();
-
-
-    /*
        DRAW
     */
 
     draw();
+
+    updateUI();
 
 
     /*
@@ -2594,15 +2497,20 @@ function gameLoop(now){
 }
 
 
-/* =========================================================
+/* =====================================================
    START GAME
-========================================================= */
+===================================================== */
 
 function startGame(){
+
+    clearTimeout(restartTimer);
 
     cancelAnimationFrame(
         animationId
     );
+
+
+    running = false;
 
 
     resetGame();
@@ -2622,18 +2530,23 @@ function startGame(){
 }
 
 
-document
-    .getElementById("start")
-    .addEventListener(
-        "click",
-        startGame
-    );
+/* =====================================================
+   NÚT CHƠI LẠI
+===================================================== */
+
+startButton.addEventListener(
+    "click",
+    function(){
+
+        startGame();
+
+    }
+);
 
 
-/* =========================================================
-   MOBILE CONTROL
-   CHỈ TRÁI / PHẢI
-========================================================= */
+/* =====================================================
+   MOBILE BUTTON
+===================================================== */
 
 function setupMoveButton(
     id,
@@ -2644,10 +2557,6 @@ function setupMoveButton(
         document.getElementById(id);
 
 
-    /*
-       BẮT ĐẦU GIỮ
-    */
-
     button.addEventListener(
         "pointerdown",
         function(e){
@@ -2656,21 +2565,17 @@ function setupMoveButton(
 
             keys[direction] = true;
 
+
             try{
 
                 button.setPointerCapture(
                     e.pointerId
                 );
 
-            }catch(err){}
-
+            }catch(error){}
         }
     );
 
-
-    /*
-       THẢ
-    */
 
     button.addEventListener(
         "pointerup",
@@ -2699,18 +2604,6 @@ function setupMoveButton(
             keys[direction] = false;
         }
     );
-
-
-    button.addEventListener(
-        "pointerleave",
-        function(){
-
-            /*
-               Không bắt buộc thả khi rời
-               nếu pointer đang được capture.
-            */
-        }
-    );
 }
 
 
@@ -2719,26 +2612,28 @@ setupMoveButton(
     "left"
 );
 
+
 setupMoveButton(
     "right",
     "right"
 );
 
 
-/* =========================================================
+/* =====================================================
    PC KEYBOARD
-========================================================= */
+===================================================== */
 
 window.addEventListener(
     "keydown",
     function(e){
 
-        if(
-            e.key ===
-            "ArrowLeft" ||
+        const key =
+            e.key.toLowerCase();
 
-            e.key.toLowerCase() ===
-            "a"
+
+        if(
+            e.key === "ArrowLeft" ||
+            key === "a"
         ){
 
             e.preventDefault();
@@ -2748,11 +2643,8 @@ window.addEventListener(
 
 
         if(
-            e.key ===
-            "ArrowRight" ||
-
-            e.key.toLowerCase() ===
-            "d"
+            e.key === "ArrowRight" ||
+            key === "d"
         ){
 
             e.preventDefault();
@@ -2767,12 +2659,13 @@ window.addEventListener(
     "keyup",
     function(e){
 
-        if(
-            e.key ===
-            "ArrowLeft" ||
+        const key =
+            e.key.toLowerCase();
 
-            e.key.toLowerCase() ===
-            "a"
+
+        if(
+            e.key === "ArrowLeft" ||
+            key === "a"
         ){
 
             keys.left = false;
@@ -2780,11 +2673,8 @@ window.addEventListener(
 
 
         if(
-            e.key ===
-            "ArrowRight" ||
-
-            e.key.toLowerCase() ===
-            "d"
+            e.key === "ArrowRight" ||
+            key === "d"
         ){
 
             keys.right = false;
@@ -2793,51 +2683,57 @@ window.addEventListener(
 );
 
 
-/* =========================================================
-   CHỐNG SCROLL KHI GIỮ NÚT
-========================================================= */
+/* =====================================================
+   CHỐNG SCROLL MOBILE
+===================================================== */
 
 document
-    .querySelectorAll(".move")
-    .forEach(
-        button => {
+.querySelectorAll(".move")
+.forEach(button => {
 
-            button.addEventListener(
-                "touchstart",
-                e => {
-                    e.preventDefault();
-                },
-                {passive:false}
-            );
-
-            button.addEventListener(
-                "touchmove",
-                e => {
-                    e.preventDefault();
-                },
-                {passive:false}
-            );
-
-            button.addEventListener(
-                "touchend",
-                e => {
-                    e.preventDefault();
-                },
-                {passive:false}
-            );
-        }
+    button.addEventListener(
+        "touchstart",
+        e => e.preventDefault(),
+        {passive:false}
     );
 
+    button.addEventListener(
+        "touchmove",
+        e => e.preventDefault(),
+        {passive:false}
+    );
 
-/* =========================================================
-   INIT
-========================================================= */
+    button.addEventListener(
+        "touchend",
+        e => e.preventDefault(),
+        {passive:false}
+    );
+});
+
+
+/* =====================================================
+   KHỞI TẠO
+===================================================== */
 
 resetGame();
 
-draw();
+
+/*
+   TỰ ĐỘNG BẮT ĐẦU
+   => Mở GitHub Pages là chơi ngay
+*/
+
+setTimeout(
+    () => {
+
+        startGame();
+
+    },
+    300
+);
 
 </script>
 
 </body>
 </html>
+```
