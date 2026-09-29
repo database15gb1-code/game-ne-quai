@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,1928 +8,1716 @@
 
 <style>
 *{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
-    margin:0;
-    padding:0;
-    width:100%;
-    min-height:100%;
-    background:#0b1220;
-    color:white;
-    font-family:Arial,sans-serif;
-    text-align:center;
-    overflow-x:hidden;
+  margin:0;
+  padding:0;
+  background:#0b1220;
+  color:white;
+  font-family:Arial,sans-serif;
+  overflow:hidden;
+  touch-action:none;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+}
+
+#gameWrap{
+  width:min(100vw,1000px);
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
 }
 
 h1{
-    margin:12px 0;
-    font-size:30px;
+  margin:8px 0 5px;
+  font-size:28px;
 }
 
 #info{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:8px;
-    margin:8px auto;
-    max-width:1000px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:4px;
 }
 
-.box{
-    background:#17243c;
-    border:1px solid #33496e;
-    border-radius:12px;
-    padding:9px 14px;
-    font-size:17px;
-    box-shadow:0 4px 12px #0005;
+.stat{
+  background:#17243b;
+  border:1px solid #385075;
+  border-radius:12px;
+  padding:8px 14px;
+  font-size:16px;
+  font-weight:bold;
 }
 
 #game{
-    position:relative;
-    width:min(960px,96vw);
-    height:min(620px,72vh);
-    min-height:430px;
-    margin:auto;
-    border:3px solid #344d75;
-    border-radius:18px;
-    overflow:hidden;
-    background:
-        linear-gradient(#ffffff08 1px,transparent 1px),
-        linear-gradient(90deg,#ffffff08 1px,transparent 1px),
-        #142139;
-    background-size:40px 40px;
-    touch-action:none;
+  position:relative;
+  width:min(96vw,980px);
+  height:min(62vh,600px);
+  border:3px solid #385075;
+  border-radius:16px;
+  overflow:hidden;
+  background:
+    linear-gradient(#17253d 1px,transparent 1px),
+    linear-gradient(90deg,#17253d 1px,transparent 1px),
+    #101b2d;
+  background-size:40px 40px;
 }
 
-#ground{
-    position:absolute;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:32px;
-    background:#4b875b;
-    pointer-events:none;
-}
-
-.entity{
-    position:absolute;
-    pointer-events:none;
-    will-change:transform;
-}
-
-#player{
-    width:42px;
-    height:42px;
-    background:#75c94c;
-    border-radius:7px;
-    border:2px solid #d5ffba;
-    z-index:20;
-    box-shadow:0 0 15px #79ff58;
-}
-
-.eye{
-    position:absolute;
-    width:7px;
-    height:7px;
-    background:white;
-    border-radius:50%;
-    top:10px;
-}
-
-.eye.left{left:8px}
-.eye.right{right:8px}
-
-.pupil{
-    width:3px;
-    height:3px;
-    background:#111;
-    border-radius:50%;
-    margin:2px;
-}
-
-.enemy{
-    width:38px;
-    height:38px;
-    border-radius:50%;
-    border:2px solid #d7c4ff;
-    z-index:8;
-    box-shadow:0 0 12px #a86cff88;
-}
-
-.enemy.normal{background:#8d55b9}
-.enemy.fast{
-    background:#2979d7;
-    width:32px;
-    height:32px;
-    border-color:#a9d4ff;
-}
-.enemy.tank{
-    background:#28ad78;
-    width:50px;
-    height:50px;
-    border-color:#a9ffda;
-}
-.enemy.small{
-    background:#f3a13d;
-    width:28px;
-    height:28px;
-    border-color:#ffd59a;
-}
-
-.enemy-eye{
-    position:absolute;
-    width:6px;
-    height:6px;
-    background:#111;
-    top:12px;
-}
-
-.enemy-eye.one{left:8px}
-.enemy-eye.two{right:8px}
-
-.bomb{
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    background:#242424;
-    border:2px solid #444;
-    z-index:14;
-    box-shadow:0 0 15px #ffb00088;
-}
-
-.bomb:after{
-    content:"";
-    position:absolute;
-    width:5px;
-    height:11px;
-    background:#ffb000;
-    top:-9px;
-    left:12px;
-}
-
-.fruit{
-    width:30px;
-    height:30px;
-    border-radius:50%;
-    background:#ff4f68;
-    border:2px solid white;
-    z-index:15;
-    box-shadow:0 0 16px #ff4f68;
-}
-
-.rainbow{
-    background:conic-gradient(
-        #ff3030,
-        #ff9d00,
-        #ffe600,
-        #38d46a,
-        #27a8ff,
-        #7e5cff,
-        #e95cff,
-        #ff3030
-    );
-    box-shadow:0 0 25px #fff;
-}
-
-.hp{
-    background:#55e889;
-    box-shadow:0 0 18px #55e889;
-}
-
-.projectile{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:#ffe35b;
-    box-shadow:0 0 10px #ffe35b;
-    z-index:12;
-}
-
-.fireball{
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    background:#ff7a18;
-    box-shadow:0 0 20px #ff4218;
-}
-
-.laser{
-    position:absolute;
-    height:8px;
-    background:#ff43e9;
-    box-shadow:0 0 15px #ff43e9,0 0 30px #ff43e9;
-    border-radius:10px;
-    z-index:11;
-    pointer-events:none;
-}
-
-.lightning{
-    position:absolute;
-    width:7px;
-    background:#64d9ff;
-    box-shadow:0 0 14px #64d9ff;
-    border-radius:8px;
-    z-index:11;
-    pointer-events:none;
-}
-
-.iceEffect{
-    position:absolute;
-    width:55px;
-    height:55px;
-    border:4px solid #9cecff;
-    border-radius:50%;
-    box-shadow:0 0 22px #51dcff;
-    pointer-events:none;
-    z-index:10;
-}
-
-.explosion{
-    position:absolute;
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    border:5px solid #ffb52e;
-    box-shadow:0 0 30px #ff5b22;
-    pointer-events:none;
-    z-index:30;
-    animation:explode .35s ease-out forwards;
-}
-
-@keyframes explode{
-    from{
-        transform:scale(.2);
-        opacity:1;
-    }
-    to{
-        transform:scale(1.5);
-        opacity:0;
-    }
-}
-
-#fruitText{
-    position:absolute;
-    left:10px;
-    top:8px;
-    font-size:18px;
-    z-index:40;
-    text-shadow:0 2px 5px #000;
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
 }
 
 #message{
-    position:absolute;
-    top:45%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    font-size:30px;
-    font-weight:bold;
-    text-shadow:0 3px 10px #000;
-    z-index:100;
-    pointer-events:none;
+  position:absolute;
+  left:50%;
+  top:42%;
+  transform:translate(-50%,-50%) scale(.7);
+  font-size:clamp(28px,6vw,60px);
+  font-weight:900;
+  text-align:center;
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:0;
+  z-index:20;
+  text-shadow:
+    0 4px 0 #000,
+    0 0 18px rgba(255,255,255,.7);
+}
+
+#message.show{
+  animation:messagePop 2.3s ease forwards;
+}
+
+@keyframes messagePop{
+  0%{
     opacity:0;
-    transition:.2s;
-    white-space:nowrap;
-}
-
-#startScreen,
-#gameOver{
-    position:absolute;
-    inset:0;
-    background:#08101ee8;
-    z-index:200;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:15px;
-    padding:20px;
-}
-
-#gameOver{
-    display:none;
-}
-
-button{
-    border:0;
-    border-radius:14px;
-    padding:13px 25px;
-    font-size:18px;
-    font-weight:bold;
-    color:white;
-    background:#3e7cff;
-    cursor:pointer;
-    box-shadow:0 5px 12px #0005;
-}
-
-button:active{
-    transform:scale(.94);
+    transform:translate(-50%,-50%) scale(.5);
+  }
+  15%{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1.15);
+  }
+  30%{
+    transform:translate(-50%,-50%) scale(1);
+  }
+  75%{
+    opacity:1;
+  }
+  100%{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.9);
+  }
 }
 
 #controls{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:14px;
-    margin:12px auto;
-    user-select:none;
+  width:min(96vw,980px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+  padding:0 8px;
 }
 
-.control{
-    width:78px;
-    height:68px;
-    font-size:35px;
-    padding:0;
-    background:#263a5e;
-    border:2px solid #5573a7;
-    touch-action:none;
+.arrows{
+  display:grid;
+  grid-template-columns:repeat(3,68px);
+  grid-template-rows:repeat(2,68px);
+  gap:7px;
 }
 
-#controls .middle{
-    display:flex;
-    flex-direction:column;
-    gap:7px;
+.arrow{
+  width:68px;
+  height:68px;
+  border:0;
+  border-radius:18px;
+  background:#263c61;
+  color:white;
+  font-size:34px;
+  font-weight:bold;
+  box-shadow:0 5px 0 #13233d;
+  user-select:none;
 }
 
-#controls .middle .control{
-    width:78px;
-    height:55px;
+.arrow:active{
+  transform:translateY(4px);
+  box-shadow:0 1px 0 #13233d;
+  background:#3e5f91;
 }
+
+.up{grid-column:2}
+.left{grid-column:1;grid-row:2}
+.down{grid-column:2;grid-row:2}
+.right{grid-column:3;grid-row:2}
 
 .skillButtons{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:8px;
-    margin:8px auto 16px;
-    max-width:950px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  max-width:430px;
 }
 
 .skillBtn{
-    font-size:14px;
-    padding:9px 12px;
-    background:#202f4c;
-    border:1px solid #49668e;
+  min-width:105px;
+  min-height:50px;
+  border:0;
+  border-radius:14px;
+  color:white;
+  background:#263c61;
+  font-weight:bold;
+  font-size:14px;
+  padding:8px 12px;
+  box-shadow:0 4px 0 #13233d;
+}
+
+.skillBtn:active{
+  transform:translateY(3px);
+  box-shadow:0 1px 0 #13233d;
 }
 
 #tip{
-    font-size:14px;
-    color:#b9c7dd;
-    margin-bottom:10px;
+  font-size:13px;
+  opacity:.75;
+  margin-top:5px;
 }
 
 @media(max-width:600px){
-    h1{
-        font-size:25px;
-    }
+  h1{font-size:22px}
 
-    .box{
-        font-size:14px;
-        padding:7px 9px;
-    }
+  .stat{
+    font-size:13px;
+    padding:6px 9px;
+  }
 
-    #game{
-        width:96vw;
-        height:62vh;
-        min-height:390px;
-    }
+  #game{
+    height:55vh;
+  }
 
-    .control{
-        width:82px;
-        height:70px;
-    }
+  .arrows{
+    grid-template-columns:repeat(3,60px);
+    grid-template-rows:repeat(2,60px);
+  }
 
-    #message{
-        font-size:23px;
-    }
+  .arrow{
+    width:60px;
+    height:60px;
+    font-size:29px;
+  }
+
+  .skillButtons{
+    max-width:230px;
+  }
+
+  .skillBtn{
+    min-width:105px;
+    font-size:12px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎮 Né Quái</h1>
+<div id="gameWrap">
 
-<div id="info">
-    <div class="box">🏆 Điểm: <b id="score">0</b></div>
-    <div class="box">🔥 Kỷ lục: <b id="highScore">0</b></div>
-    <div class="box">❤️ Máu: <b id="hp">100</b></div>
-    <div class="box">🗺️ Màn: <b id="level">1</b></div>
-    <div class="box">✨ Skill: <b id="skill">Không</b></div>
-</div>
+  <h1>🎮 Né Quái</h1>
 
-<div id="game">
+  <div id="info">
+    <div class="stat">🏆 Điểm: <span id="score">0</span></div>
+    <div class="stat">🔥 Kỷ lục: <span id="best">0</span></div>
+    <div class="stat">❤️ Máu: <span id="hp">100</span></div>
+    <div class="stat">✨ Skill: <span id="skill">Không có</span></div>
+  </div>
 
-    <div id="fruitText">🍎 Ăn trái cây để nhận skill</div>
-
-    <div id="player" class="entity">
-        <div class="eye left"><div class="pupil"></div></div>
-        <div class="eye right"><div class="pupil"></div></div>
-    </div>
-
-    <div id="ground"></div>
-
+  <div id="game">
+    <canvas id="canvas"></canvas>
     <div id="message"></div>
+  </div>
 
-    <div id="startScreen">
-        <h2>🎮 NÉ QUÁI</h2>
-        <p>Né quái, ăn trái cây và cố phá kỷ lục!</p>
-        <button id="startBtn">▶ Bắt đầu</button>
+  <div id="controls">
+
+    <div class="arrows">
+      <button class="arrow up" data-key="up">⬆️</button>
+      <button class="arrow left" data-key="left">⬅️</button>
+      <button class="arrow down" data-key="down">⬇️</button>
+      <button class="arrow right" data-key="right">➡️</button>
     </div>
 
-    <div id="gameOver">
-        <h2>💀 GAME OVER</h2>
-        <p>Điểm: <b id="finalScore">0</b></p>
-        <p>Kỷ lục: <b id="finalHigh">0</b></p>
-        <button id="restartBtn">🔄 Chơi lại</button>
+    <div class="skillButtons">
+      <button class="skillBtn" id="skillBtn">✨ Dùng Skill</button>
+      <button class="skillBtn" id="restartBtn">🔄 Chơi lại</button>
     </div>
 
-</div>
+  </div>
 
-<div id="controls">
+  <div id="tip">
+    Dùng ⬆️⬇️⬅️➡️ để di chuyển • Ăn 🍎 để nhận skill
+  </div>
 
-    <button class="control" id="left">◀</button>
-
-    <div class="middle">
-        <button class="control" id="up">▲</button>
-        <button class="control" id="down">▼</button>
-    </div>
-
-    <button class="control" id="right">▶</button>
-
-</div>
-
-<div class="skillButtons">
-    <button class="skillBtn" data-skill="fire">🔥 Lửa</button>
-    <button class="skillBtn" data-skill="lightning">⚡ Điện</button>
-    <button class="skillBtn" data-skill="ice">❄️ Băng</button>
-    <button class="skillBtn" data-skill="laser">🔮 Laser</button>
-    <button class="skillBtn" data-skill="rapid">🔫 Bắn nhanh</button>
-    <button class="skillBtn" data-skill="shield">🛡️ Khiên</button>
-</div>
-
-<div id="tip">
-    Bàn phím: WASD / phím mũi tên • Điện thoại: dùng các nút mũi tên
 </div>
 
 <script>
 "use strict";
 
 /* =========================================================
-   CẤU HÌNH
+   CANVAS
 ========================================================= */
 
-const CONFIG = {
-    MAX_ENEMIES: 18,
-    MAX_PROJECTILES: 35,
-    MAX_EFFECTS: 35,
-    MAX_BOMBS: 3,
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-    RAINBOW_CHANCE: 0.001,
-    HP_CHANCE: 0.001,
+let W = 900;
+let H = 520;
 
-    PLAYER_SPEED: 330,
-    START_HP: 100,
+function resizeCanvas(){
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1,2);
 
-    SCORE_LEVEL: 100
-};
+  canvas.width = Math.floor(rect.width*dpr);
+  canvas.height = Math.floor(rect.height*dpr);
+
+  W = rect.width;
+  H = rect.height;
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+window.addEventListener("resize",resizeCanvas);
 
 /* =========================================================
-   DOM
+   UI
 ========================================================= */
-
-const game = document.getElementById("game");
-const playerEl = document.getElementById("player");
 
 const scoreEl = document.getElementById("score");
-const highScoreEl = document.getElementById("highScore");
+const bestEl = document.getElementById("best");
 const hpEl = document.getElementById("hp");
-const levelEl = document.getElementById("level");
 const skillEl = document.getElementById("skill");
-
 const messageEl = document.getElementById("message");
 
-const startScreen = document.getElementById("startScreen");
-const gameOverScreen = document.getElementById("gameOver");
-
-const finalScoreEl = document.getElementById("finalScore");
-const finalHighEl = document.getElementById("finalHigh");
-
-const startBtn = document.getElementById("startBtn");
-const restartBtn = document.getElementById("restartBtn");
+let bestScore = Number(localStorage.getItem("neQuaiBest") || 0);
+bestEl.textContent = bestScore;
 
 /* =========================================================
-   GAME STATE
+   INPUT
 ========================================================= */
 
-let running = false;
-let lastTime = 0;
+const keys = {
+  up:false,
+  down:false,
+  left:false,
+  right:false
+};
+
+window.addEventListener("keydown",e=>{
+  if(e.key==="ArrowUp" || e.key==="w") keys.up=true;
+  if(e.key==="ArrowDown" || e.key==="s") keys.down=true;
+  if(e.key==="ArrowLeft" || e.key==="a") keys.left=true;
+  if(e.key==="ArrowRight" || e.key==="d") keys.right=true;
+});
+
+window.addEventListener("keyup",e=>{
+  if(e.key==="ArrowUp" || e.key==="w") keys.up=false;
+  if(e.key==="ArrowDown" || e.key==="s") keys.down=false;
+  if(e.key==="ArrowLeft" || e.key==="a") keys.left=false;
+  if(e.key==="ArrowRight" || e.key==="d") keys.right=false;
+});
+
+/* Mobile buttons */
+
+document.querySelectorAll(".arrow").forEach(btn=>{
+  const key = btn.dataset.key;
+
+  const start = e=>{
+    e.preventDefault();
+    keys[key]=true;
+  };
+
+  const end = e=>{
+    e.preventDefault();
+    keys[key]=false;
+  };
+
+  btn.addEventListener("pointerdown",start);
+  btn.addEventListener("pointerup",end);
+  btn.addEventListener("pointercancel",end);
+  btn.addEventListener("pointerleave",end);
+});
+
+/* =========================================================
+   GAME VARIABLES
+========================================================= */
 
 let score = 0;
-let hp = CONFIG.START_HP;
-
-let highScore = Number(localStorage.getItem("nequai_highscore") || 0);
-
-let level = 1;
-
-let player = {
-    x: 0,
-    y: 0,
-    w: 42,
-    h: 42
-};
-
-let enemies = [];
-let projectiles = [];
-let bombs = [];
-let fruits = [];
-let effects = [];
-
-let particles = [];
-
-let input = {
-    left:false,
-    right:false,
-    up:false,
-    down:false
-};
+let hp = 100;
+let running = true;
+let lastTime = performance.now();
 
 let currentSkill = null;
-let skillUntil = 0;
+let skillTime = 0;
 
 let spawnTimer = 0;
 let fruitTimer = 0;
 let bombTimer = 0;
-let shootTimer = 0;
-let damageCooldown = 0;
 
-let frozenEnemies = new Map();
+let rainbowTimer = 0;
+let healTimer = 0;
 
-/* =========================================================
-   KHỞI TẠO
-========================================================= */
-
-highScoreEl.textContent = highScore;
-
-function resetPlayer(){
-
-    const rect = game.getBoundingClientRect();
-
-    player.x = rect.width / 2 - 21;
-    player.y = rect.height - 80;
-
-    updatePlayer();
-}
-
-function updatePlayer(){
-
-    playerEl.style.transform =
-        `translate3d(${player.x}px,${player.y}px,0)`;
-}
-
-function clampPlayer(){
-
-    const rect = game.getBoundingClientRect();
-
-    player.x = Math.max(0,Math.min(rect.width-player.w,player.x));
-    player.y = Math.max(0,Math.min(rect.height-32-player.h,player.y));
-}
+let effects = [];
 
 /* =========================================================
-   ENTITY CREATION
+   LIMITS - QUAN TRỌNG CHỐNG LAG
 ========================================================= */
 
-function createEnemy(){
+const MAX_ENEMIES = 18;
+const MAX_BULLETS = 25;
+const MAX_EFFECTS = 60;
+const MAX_PARTICLES = 80;
 
-    if(!running) return;
-
-    if(enemies.length >= CONFIG.MAX_ENEMIES) return;
-
-    const rect = game.getBoundingClientRect();
-
-    const types = ["normal","normal","normal","fast","tank","small"];
-
-    const type = types[Math.floor(Math.random()*types.length)];
-
-    let size = 38;
-    let hpEnemy = 1;
-    let speed = 80;
-
-    if(type === "fast"){
-        size = 32;
-        speed = 145;
-    }
-
-    if(type === "tank"){
-        size = 50;
-        hpEnemy = 3;
-        speed = 55;
-    }
-
-    if(type === "small"){
-        size = 28;
-        speed = 180;
-    }
-
-    const el = document.createElement("div");
-
-    el.className = `entity enemy ${type}`;
-
-    el.innerHTML = `
-        <div class="enemy-eye one"></div>
-        <div class="enemy-eye two"></div>
-    `;
-
-    game.appendChild(el);
-
-    const enemy = {
-        el,
-        x:Math.random()*(rect.width-size),
-        y:-size-10,
-        size,
-        hp:hpEnemy,
-        maxHp:hpEnemy,
-        speed:speed + level*4,
-        phase:Math.random()*Math.PI*2,
-        dead:false
-    };
-
-    enemies.push(enemy);
-
-    renderEnemy(enemy);
-}
-
-function renderEnemy(e){
-
-    e.el.style.transform =
-        `translate3d(${e.x}px,${e.y}px,0)`;
-}
+let enemies = [];
+let bullets = [];
+let fruits = [];
+let bombs = [];
+let particles = [];
 
 /* =========================================================
-   BOM
+   PLAYER
 ========================================================= */
 
-function createBomb(){
-
-    if(!running) return;
-
-    if(bombs.length >= CONFIG.MAX_BOMBS) return;
-
-    const rect = game.getBoundingClientRect();
-
-    const el = document.createElement("div");
-
-    el.className = "entity bomb";
-
-    game.appendChild(el);
-
-    const bomb = {
-        el,
-        x:Math.random()*(rect.width-32),
-        y:-40,
-        speed:180 + Math.random()*80,
-        dead:false
-    };
-
-    bombs.push(bomb);
-}
-
-function explodeBomb(bomb){
-
-    if(bomb.dead) return;
-
-    bomb.dead = true;
-
-    createExplosion(bomb.x-20,bomb.y-20);
-
-    /*
-       QUAN TRỌNG:
-       BOM CHỈ GÂY SÁT THƯƠNG NGƯỜI CHƠI.
-       KHÔNG KIỂM TRA VA CHẠM VỚI QUÁI.
-    */
-
-    const dx = player.x + player.w/2 - (bomb.x+16);
-    const dy = player.y + player.h/2 - (bomb.y+16);
-
-    const distance = Math.sqrt(dx*dx+dy*dy);
-
-    if(distance < 75){
-        damagePlayer(25);
-    }
-}
+const player = {
+  x:450,
+  y:420,
+  r:18,
+  speed:270,
+  invincible:0
+};
 
 /* =========================================================
-   TRÁI CÂY
+   SKILLS
 ========================================================= */
 
-function createFruit(){
-
-    if(!running) return;
-
-    if(fruits.length >= 2) return;
-
-    const rect = game.getBoundingClientRect();
-
-    const roll = Math.random();
-
-    let type = "skill";
-
-    /*
-       0.1% trái 7 sắc cầu vồng
-    */
-    if(roll < CONFIG.RAINBOW_CHANCE){
-        type = "rainbow";
-    }
-    /*
-       0.1% trái hồi máu
-    */
-    else if(roll < CONFIG.RAINBOW_CHANCE + CONFIG.HP_CHANCE){
-        type = "hp";
-    }
-
-    const el = document.createElement("div");
-
-    el.className =
-        `entity fruit ${type === "rainbow" ? "rainbow":""} ${type === "hp" ? "hp":""}`;
-
-    game.appendChild(el);
-
-    const fruit = {
-        el,
-        type,
-        x:Math.random()*(rect.width-30),
-        y:-35,
-        speed:70,
-        dead:false
-    };
-
-    fruits.push(fruit);
-}
-
-/* =========================================================
-   SKILL
-========================================================= */
+const SKILLS = [
+  "fire",
+  "electric",
+  "ice",
+  "rapid",
+  "shield",
+  "laser"
+];
 
 const skillNames = {
-    fire:"🔥 Phun lửa",
-    lightning:"⚡ Tia điện",
-    ice:"❄️ Tia băng",
-    laser:"🔮 Laser",
-    rapid:"🔫 Bắn nhanh",
-    shield:"🛡️ Khiên"
+  fire:"🔥 Phun lửa",
+  electric:"⚡ Tia điện",
+  ice:"❄️ Tia băng",
+  rapid:"🔫 Bắn nhanh",
+  shield:"🛡️ Khiên",
+  laser:"🔆 Laser"
 };
 
 function giveRandomSkill(){
+  currentSkill = SKILLS[Math.floor(Math.random()*SKILLS.length)];
+  skillTime = 20;
 
-    const skills = Object.keys(skillNames);
+  skillEl.textContent =
+    skillNames[currentSkill] + " 20s";
 
-    const selected =
-        skills[Math.floor(Math.random()*skills.length)];
-
-    currentSkill = selected;
-
-    let duration = 10000;
-
-    if(selected === "fire") duration = 20000;
-    if(selected === "shield") duration = 15000;
-    if(selected === "rapid") duration = 20000;
-
-    skillUntil = performance.now() + duration;
-
-    skillEl.textContent =
-        `${skillNames[selected]} ${Math.ceil(duration/1000)}s`;
-
-    showMessage(skillNames[selected],700);
-}
-
-function useSkill(type){
-
-    currentSkill = type;
-    skillUntil = performance.now() + 10000;
-
-    skillEl.textContent = skillNames[type];
-
-    showMessage(skillNames[type],600);
-}
-
-function updateSkill(now){
-
-    if(!currentSkill) return;
-
-    const remaining = skillUntil-now;
-
-    if(remaining <= 0){
-
-        currentSkill = null;
-        skillEl.textContent = "Không";
-
-        return;
-    }
-
-    skillEl.textContent =
-        `${skillNames[currentSkill]} ${Math.ceil(remaining/1000)}s`;
-}
-
-/* =========================================================
-   ĐẠN
-========================================================= */
-
-function shoot(){
-
-    if(!running) return;
-
-    if(projectiles.length >= CONFIG.MAX_PROJECTILES) return;
-
-    const p = {
-        el:document.createElement("div"),
-        x:player.x+player.w/2-4,
-        y:player.y-10,
-        vx:0,
-        vy:-520,
-        damage:1,
-        dead:false
-    };
-
-    p.el.className = "entity projectile";
-
-    game.appendChild(p.el);
-
-    projectiles.push(p);
-}
-
-function rapidShoot(){
-
-    shoot();
-
-    if(projectiles.length < CONFIG.MAX_PROJECTILES){
-
-        setTimeout(()=>{
-            if(running) shoot();
-        },80);
-
-    }
-}
-
-/* =========================================================
-   SKILL TẤN CÔNG
-========================================================= */
-
-function fireAttack(){
-
-    if(effects.length >= CONFIG.MAX_EFFECTS) return;
-
-    const p = {
-        el:document.createElement("div"),
-        x:player.x+player.w/2-8,
-        y:player.y-25,
-        vx:0,
-        vy:-400,
-        damage:3,
-        life:1400,
-        dead:false
-    };
-
-    p.el.className = "entity fireball";
-
-    game.appendChild(p.el);
-
-    projectiles.push(p);
-}
-
-function laserAttack(){
-
-    if(effects.length >= CONFIG.MAX_EFFECTS) return;
-
-    const rect = game.getBoundingClientRect();
-
-    const el = document.createElement("div");
-
-    el.className = "laser";
-
-    el.style.left = "0px";
-    el.style.width = rect.width+"px";
-    el.style.top = (player.y+15)+"px";
-
-    game.appendChild(el);
-
-    const effect = {
-        el,
-        life:220,
-        dead:false
-    };
-
-    effects.push(effect);
-
-    /*
-       Laser gây sát thương quái.
-    */
-
-    for(const enemy of enemies){
-
-        if(enemy.dead) continue;
-
-        const ey = enemy.y + enemy.size/2;
-        const py = player.y+player.h/2;
-
-        if(Math.abs(ey-py)<35){
-
-            damageEnemy(enemy,2);
-        }
-    }
-}
-
-function lightningAttack(){
-
-    if(effects.length >= CONFIG.MAX_EFFECTS) return;
-
-    const rect = game.getBoundingClientRect();
-
-    const x =
-        Math.random()*(rect.width-10);
-
-    const el = document.createElement("div");
-
-    el.className = "lightning";
-
-    el.style.left = x+"px";
-    el.style.top = "0px";
-    el.style.height = rect.height+"px";
-
-    game.appendChild(el);
-
-    effects.push({
-        el,
-        life:180,
-        dead:false
-    });
-
-    for(const enemy of enemies){
-
-        if(enemy.dead) continue;
-
-        if(Math.abs(enemy.x-x)<45){
-
-            damageEnemy(enemy,3);
-        }
-    }
-}
-
-function iceAttack(){
-
-    if(effects.length >= CONFIG.MAX_EFFECTS) return;
-
-    const rect = game.getBoundingClientRect();
-
-    const centerX =
-        player.x + player.w/2;
-
-    const centerY =
-        player.y + player.h/2;
-
-    const el = document.createElement("div");
-
-    el.className = "iceEffect";
-
-    el.style.left = centerX-27+"px";
-    el.style.top = centerY-27+"px";
-
-    game.appendChild(el);
-
-    effects.push({
-        el,
-        life:350,
-        dead:false
-    });
-
-    for(const enemy of enemies){
-
-        if(enemy.dead) continue;
-
-        const dx =
-            enemy.x+enemy.size/2-centerX;
-
-        const dy =
-            enemy.y+enemy.size/2-centerY;
-
-        const distance =
-            Math.sqrt(dx*dx+dy*dy);
-
-        if(distance < 180){
-
-            /*
-              Đóng băng nhưng VẪN CÓ THỂ GIẾT QUÁI.
-            */
-
-            frozenEnemies.set(enemy,performance.now()+2500);
-
-            damageEnemy(enemy,1);
-        }
-    }
-}
-
-/* =========================================================
-   SÁT THƯƠNG
-========================================================= */
-
-function damageEnemy(enemy,damage){
-
-    if(!enemy || enemy.dead) return;
-
-    enemy.hp -= damage;
-
-    if(enemy.hp <= 0){
-
-        killEnemy(enemy);
-
-    }
-}
-
-function killEnemy(enemy){
-
-    if(enemy.dead) return;
-
-    enemy.dead = true;
-
-    createExplosion(
-        enemy.x-15,
-        enemy.y-15
-    );
-
-    score += 1;
-
-    updateScore();
-}
-
-/* =========================================================
-   NGƯỜI CHƠI
-========================================================= */
-
-function damagePlayer(amount){
-
-    if(!running) return;
-
-    if(currentSkill === "shield"){
-        return;
-    }
-
-    if(damageCooldown > 0){
-        return;
-    }
-
-    damageCooldown = 700;
-
-    hp -= amount;
-
-    if(hp < 0) hp = 0;
-
-    hpEl.textContent = hp;
-
-    showMessage(`-${amount} ❤️`,350);
-
-    if(hp <= 0){
-
-        endGame();
-    }
-}
-
-/* =========================================================
-   VA CHẠM
-========================================================= */
-
-function collision(a,b){
-
-    return (
-        a.x < b.x+b.w &&
-        a.x+a.w > b.x &&
-        a.y < b.y+b.h &&
-        a.y+a.h > b.y
-    );
-}
-
-function playerRect(){
-
-    return {
-        x:player.x,
-        y:player.y,
-        w:player.w,
-        h:player.h
-    };
-}
-
-function enemyRect(e){
-
-    return {
-        x:e.x,
-        y:e.y,
-        w:e.size,
-        h:e.size
-    };
-}
-
-/* =========================================================
-   EXPLOSION
-========================================================= */
-
-function createExplosion(x,y){
-
-    if(effects.length >= CONFIG.MAX_EFFECTS) return;
-
-    const el = document.createElement("div");
-
-    el.className = "explosion";
-
-    el.style.left = x+"px";
-    el.style.top = y+"px";
-
-    game.appendChild(el);
-
-    effects.push({
-        el,
-        life:350,
-        dead:false
-    });
+  showMessage(skillNames[currentSkill]);
 }
 
 /* =========================================================
    MESSAGE
 ========================================================= */
 
-let messageTimer = null;
+let messageTimeout = null;
 
-function showMessage(text,duration){
+function showMessage(text){
 
-    messageEl.textContent = text;
-    messageEl.style.opacity = "1";
+  messageEl.classList.remove("show");
 
-    clearTimeout(messageTimer);
+  void messageEl.offsetWidth;
 
-    messageTimer = setTimeout(()=>{
-        messageEl.style.opacity = "0";
-    },duration);
+  messageEl.textContent = text;
+  messageEl.classList.add("show");
+
+  clearTimeout(messageTimeout);
+
+  messageTimeout = setTimeout(()=>{
+    messageEl.classList.remove("show");
+  },2300);
+}
+
+/* =========================================================
+   PLAYER MOVEMENT
+========================================================= */
+
+function updatePlayer(dt){
+
+  let dx=0;
+  let dy=0;
+
+  if(keys.left) dx--;
+  if(keys.right) dx++;
+  if(keys.up) dy--;
+  if(keys.down) dy++;
+
+  if(dx!==0 || dy!==0){
+
+    const len = Math.hypot(dx,dy);
+
+    dx/=len;
+    dy/=len;
+
+    player.x += dx*player.speed*dt;
+    player.y += dy*player.speed*dt;
+  }
+
+  player.x=Math.max(player.r,Math.min(W-player.r,player.x));
+  player.y=Math.max(player.r,Math.min(H-player.r,player.y));
+
+  if(player.invincible>0){
+    player.invincible-=dt;
+  }
+}
+
+/* =========================================================
+   ENEMIES
+========================================================= */
+
+function spawnEnemy(){
+
+  if(enemies.length>=MAX_ENEMIES) return;
+
+  const types=[
+    {r:15,speed:55,color:"#4ade80",damage:12},
+    {r:20,speed:45,color:"#a855f7",damage:16},
+    {r:12,speed:80,color:"#60a5fa",damage:10},
+    {r:24,speed:35,color:"#f59e0b",damage:20}
+  ];
+
+  const type=types[Math.floor(Math.random()*types.length)];
+
+  let x,y;
+
+  const side=Math.floor(Math.random()*4);
+
+  if(side===0){
+    x=Math.random()*W;
+    y=-40;
+  }
+  else if(side===1){
+    x=W+40;
+    y=Math.random()*H;
+  }
+  else if(side===2){
+    x=Math.random()*W;
+    y=H+40;
+  }
+  else{
+    x=-40;
+    y=Math.random()*H;
+  }
+
+  enemies.push({
+    x,
+    y,
+    r:type.r,
+    speed:type.speed + Math.min(score*.15,45),
+    color:type.color,
+    damage:type.damage,
+    frozen:0,
+    hp:1
+  });
+}
+
+function updateEnemies(dt){
+
+  for(let i=enemies.length-1;i>=0;i--){
+
+    const e=enemies[i];
+
+    if(e.frozen>0){
+      e.frozen-=dt;
+    }
+    else{
+
+      const dx=player.x-e.x;
+      const dy=player.y-e.y;
+      const d=Math.hypot(dx,dy)||1;
+
+      e.x += dx/d*e.speed*dt;
+      e.y += dy/d*e.speed*dt;
+    }
+
+    /* va chạm player */
+
+    const dx=player.x-e.x;
+    const dy=player.y-e.y;
+
+    if(dx*dx+dy*dy <
+       (player.r+e.r)*(player.r+e.r)){
+
+      damagePlayer(e.damage);
+
+      /* đẩy quái ra */
+      const d=Math.hypot(dx,dy)||1;
+
+      e.x -= dx/d*35;
+      e.y -= dy/d*35;
+    }
+
+    /* tự xóa nếu ra quá xa */
+
+    if(
+      e.x < -150 ||
+      e.x > W+150 ||
+      e.y < -150 ||
+      e.y > H+150
+    ){
+      enemies.splice(i,1);
+    }
+  }
+}
+
+/* =========================================================
+   BULLETS
+========================================================= */
+
+function shootBullet(){
+
+  if(bullets.length>=MAX_BULLETS) return;
+
+  let nearest=null;
+  let best=Infinity;
+
+  for(const e of enemies){
+
+    const dx=e.x-player.x;
+    const dy=e.y-player.y;
+    const d=dx*dx+dy*dy;
+
+    if(d<best){
+      best=d;
+      nearest=e;
+    }
+  }
+
+  if(!nearest) return;
+
+  const dx=nearest.x-player.x;
+  const dy=nearest.y-player.y;
+  const len=Math.hypot(dx,dy)||1;
+
+  bullets.push({
+    x:player.x,
+    y:player.y,
+    vx:dx/len*500,
+    vy:dy/len*500,
+    life:1.5,
+    damage:1
+  });
+}
+
+function updateBullets(dt){
+
+  for(let i=bullets.length-1;i>=0;i--){
+
+    const b=bullets[i];
+
+    b.x+=b.vx*dt;
+    b.y+=b.vy*dt;
+    b.life-=dt;
+
+    let hit=false;
+
+    for(let j=enemies.length-1;j>=0;j--){
+
+      const e=enemies[j];
+
+      const dx=b.x-e.x;
+      const dy=b.y-e.y;
+
+      if(dx*dx+dy*dy < (e.r+5)*(e.r+5)){
+
+        killEnemy(j);
+
+        hit=true;
+        break;
+      }
+    }
+
+    if(
+      hit ||
+      b.life<=0 ||
+      b.x<-100 ||
+      b.x>W+100 ||
+      b.y<-100 ||
+      b.y>H+100
+    ){
+      bullets.splice(i,1);
+    }
+  }
+}
+
+/* =========================================================
+   KILL ENEMY
+========================================================= */
+
+function killEnemy(index){
+
+  if(!enemies[index]) return;
+
+  const e=enemies[index];
+
+  createParticles(
+    e.x,
+    e.y,
+    5,
+    e.color
+  );
+
+  enemies.splice(index,1);
+
+  score++;
+
+  updateScore();
+}
+
+/* =========================================================
+   FRUITS
+========================================================= */
+
+function spawnFruit(){
+
+  if(fruits.length>=2) return;
+
+  fruits.push({
+    x:30+Math.random()*(W-60),
+    y:40+Math.random()*(H-80),
+    r:14,
+    type:"normal",
+    life:12
+  });
+}
+
+/* 0.1% rainbow */
+
+function tryRainbow(){
+
+  if(Math.random()<0.001){
+
+    fruits.push({
+      x:30+Math.random()*(W-60),
+      y:40+Math.random()*(H-80),
+      r:18,
+      type:"rainbow",
+      life:15
+    });
+
+    showMessage("🌈 TRÁI 7 SẮC CẦU VỒNG!");
+  }
+}
+
+/* 0.1% HP */
+
+function tryHeal(){
+
+  if(Math.random()<0.001){
+
+    fruits.push({
+      x:30+Math.random()*(W-60),
+      y:40+Math.random()*(H-80),
+      r:15,
+      type:"heal",
+      life:15
+    });
+
+    showMessage("❤️ HP MAY MẮN!");
+  }
+}
+
+function updateFruits(dt){
+
+  for(let i=fruits.length-1;i>=0;i--){
+
+    const f=fruits[i];
+
+    f.life-=dt;
+
+    const dx=player.x-f.x;
+    const dy=player.y-f.y;
+
+    if(dx*dx+dy*dy <
+       (player.r+f.r)*(player.r+f.r)){
+
+      if(f.type==="rainbow"){
+
+        currentSkill="laser";
+        skillTime=40;
+
+        skillEl.textContent="🌈 Siêu Skill 40s";
+
+        showMessage("🌈 SIÊU SKILL!");
+      }
+
+      else if(f.type==="heal"){
+
+        hp=Math.min(100,hp+35);
+
+        showMessage("❤️ +35 HP");
+      }
+
+      else{
+
+        giveRandomSkill();
+      }
+
+      fruits.splice(i,1);
+      continue;
+    }
+
+    if(f.life<=0){
+      fruits.splice(i,1);
+    }
+  }
+}
+
+/* =========================================================
+   BOM
+   CHỈ GÂY DAMAGE PLAYER
+========================================================= */
+
+function spawnBomb(){
+
+  if(bombs.length>=3) return;
+
+  bombs.push({
+    x:40+Math.random()*(W-80),
+    y:-30,
+    vy:150+Math.random()*80,
+    r:18,
+    exploded:false
+  });
+}
+
+function updateBombs(dt){
+
+  for(let i=bombs.length-1;i>=0;i--){
+
+    const b=bombs[i];
+
+    b.y+=b.vy*dt;
+
+    /* BOM KHÔNG KIỂM TRA QUÁI */
+
+    const dx=player.x-b.x;
+    const dy=player.y-b.y;
+
+    if(
+      dx*dx+dy*dy <
+      (player.r+b.r)*(player.r+b.r)
+    ){
+
+      damagePlayer(25);
+
+      createExplosion(b.x,b.y);
+
+      bombs.splice(i,1);
+
+      continue;
+    }
+
+    if(b.y>H+50){
+
+      bombs.splice(i,1);
+    }
+  }
+}
+
+/* =========================================================
+   DAMAGE
+========================================================= */
+
+function damagePlayer(amount){
+
+  if(player.invincible>0) return;
+
+  if(currentSkill==="shield"){
+    player.invincible=.35;
+    return;
+  }
+
+  hp-=amount;
+
+  player.invincible=.7;
+
+  if(hp<=0){
+
+    hp=0;
+
+    updateUI();
+
+    gameOver();
+  }
+}
+
+/* =========================================================
+   SKILL SYSTEM
+========================================================= */
+
+let skillCooldown=0;
+
+function useSkill(){
+
+  if(!currentSkill) return;
+  if(skillCooldown>0) return;
+  if(!running) return;
+
+  skillCooldown=.35;
+
+  switch(currentSkill){
+
+    case "fire":
+      fireAttack();
+      break;
+
+    case "electric":
+      electricAttack();
+      break;
+
+    case "ice":
+      iceAttack();
+      break;
+
+    case "rapid":
+      rapidAttack();
+      break;
+
+    case "shield":
+      player.invincible=3;
+      showMessage("🛡️ KHIÊN 3 GIÂY!");
+      break;
+
+    case "laser":
+      laserAttack();
+      break;
+  }
+}
+
+/* FIRE */
+
+function fireAttack(){
+
+  const max=6;
+
+  let count=0;
+
+  for(let i=enemies.length-1;i>=0 && count<max;i--){
+
+    const e=enemies[i];
+
+    if(Math.hypot(
+      e.x-player.x,
+      e.y-player.y
+    )<230){
+
+      killEnemy(i);
+      count++;
+    }
+  }
+
+  createEffect({
+    type:"fire",
+    x:player.x,
+    y:player.y,
+    life:.5,
+    maxLife:.5,
+    radius:230
+  });
+
+  showMessage("🔥 PHUN LỬA!");
+}
+
+/* ELECTRIC */
+
+function electricAttack(){
+
+  const max=8;
+  let count=0;
+
+  for(let i=enemies.length-1;i>=0 && count<max;i--){
+
+    const e=enemies[i];
+
+    if(Math.hypot(
+      e.x-player.x,
+      e.y-player.y
+    )<270){
+
+      createEffect({
+        type:"electric",
+        x1:player.x,
+        y1:player.y,
+        x2:e.x,
+        y2:e.y,
+        life:.25,
+        maxLife:.25
+      });
+
+      killEnemy(i);
+
+      count++;
+    }
+  }
+
+  showMessage("⚡ TIA ĐIỆN!");
+}
+
+/* ICE
+   Đóng băng + vẫn GIẾT được */
+
+function iceAttack(){
+
+  let count=0;
+
+  for(let i=enemies.length-1;i>=0 && count<8;i--){
+
+    const e=enemies[i];
+
+    if(Math.hypot(
+      e.x-player.x,
+      e.y-player.y
+    )<300){
+
+      e.frozen=3;
+
+      createEffect({
+        type:"ice",
+        x:e.x,
+        y:e.y,
+        life:.5,
+        maxLife:.5,
+        radius:e.r+12
+      });
+
+      /* tia băng vẫn gây damage */
+      setTimeout(()=>{
+        if(enemies.includes(e)){
+          const index=enemies.indexOf(e);
+          if(index>=0) killEnemy(index);
+        }
+      },350);
+
+      count++;
+    }
+  }
+
+  showMessage("❄️ ĐÓNG BĂNG!");
+}
+
+/* RAPID */
+
+function rapidAttack(){
+
+  for(let i=0;i<5;i++){
+    setTimeout(()=>{
+      if(running) shootBullet();
+    },i*80);
+  }
+
+  showMessage("🔫 BẮN NHANH!");
+}
+
+/* LASER */
+
+function laserAttack(){
+
+  createEffect({
+    type:"laser",
+    x:player.x,
+    y:player.y,
+    life:.7,
+    maxLife:.7
+  });
+
+  for(let i=enemies.length-1;i>=0;i--){
+
+    const e=enemies[i];
+
+    if(
+      Math.abs(e.x-player.x)<35
+    ){
+      killEnemy(i);
+    }
+  }
+
+  showMessage("🔆 SIÊU LASER!");
+}
+
+/* =========================================================
+   EFFECTS
+========================================================= */
+
+function createEffect(effect){
+
+  if(effects.length>=MAX_EFFECTS){
+    effects.shift();
+  }
+
+  effects.push(effect);
+}
+
+function updateEffects(dt){
+
+  for(let i=effects.length-1;i>=0;i--){
+
+    effects[i].life-=dt;
+
+    if(effects[i].life<=0){
+      effects.splice(i,1);
+    }
+  }
+}
+
+function createExplosion(x,y){
+
+  createEffect({
+    type:"explosion",
+    x,
+    y,
+    life:.5,
+    maxLife:.5,
+    radius:70
+  });
+
+  createParticles(x,y,12,"orange");
+}
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function createParticles(x,y,count,color){
+
+  count=Math.min(count,MAX_PARTICLES);
+
+  for(let i=0;i<count;i++){
+
+    if(particles.length>=MAX_PARTICLES){
+      particles.shift();
+    }
+
+    const a=Math.random()*Math.PI*2;
+    const speed=40+Math.random()*100;
+
+    particles.push({
+      x,
+      y,
+      vx:Math.cos(a)*speed,
+      vy:Math.sin(a)*speed,
+      life:.5+Math.random()*.5,
+      color
+    });
+  }
+}
+
+function updateParticles(dt){
+
+  for(let i=particles.length-1;i>=0;i--){
+
+    const p=particles[i];
+
+    p.x+=p.vx*dt;
+    p.y+=p.vy*dt;
+
+    p.life-=dt;
+
+    if(p.life<=0){
+      particles.splice(i,1);
+    }
+  }
 }
 
 /* =========================================================
    SCORE
 ========================================================= */
 
+let reached200=false;
+let reached500=false;
+
 function updateScore(){
 
-    scoreEl.textContent = score;
+  scoreEl.textContent=score;
 
-    level =
-        Math.floor(score/CONFIG.SCORE_LEVEL)+1;
+  if(score>bestScore){
 
-    levelEl.textContent = level;
+    bestScore=score;
 
-    if(score > highScore){
+    localStorage.setItem(
+      "neQuaiBest",
+      bestScore
+    );
 
-        highScore = score;
+    bestEl.textContent=bestScore;
+  }
 
-        localStorage.setItem(
-            "nequai_highscore",
-            highScore
-        );
+  /*
+    HIỆN CHỮ NGAY GIỮA MÀN HÌNH
+  */
 
-        highScoreEl.textContent = highScore;
-    }
+  if(score>=200 && !reached200){
 
-    /*
-       THÔNG BÁO MỐC ĐIỂM
-    */
+    reached200=true;
 
-    if(score === 200){
+    showMessage("🐔 ÔI GÀ THẾ!");
+  }
 
-        showMessage("🐔 Gà thế!",1800);
-    }
+  if(score>=500 && !reached500){
 
-    if(score === 500){
+    reached500=true;
 
-        showMessage(
-            "😳 Ơ hay thằng này giỏi thế!",
-            2500
-        );
-    }
+    showMessage("😳 Ơ HAY, THẰNG NÀY GIỎI THẾ!");
+  }
 }
 
 /* =========================================================
-   UPDATE ENEMIES
+   UI UPDATE
 ========================================================= */
 
-function updateEnemies(dt,now){
-
-    const rect = game.getBoundingClientRect();
-
-    for(const enemy of enemies){
-
-        if(enemy.dead) continue;
-
-        const frozenUntil =
-            frozenEnemies.get(enemy) || 0;
-
-        const frozen =
-            now < frozenUntil;
-
-        if(!frozen){
-
-            const dx =
-                player.x-enemy.x;
-
-            const dy =
-                player.y-enemy.y;
-
-            const dist =
-                Math.sqrt(dx*dx+dy*dy);
-
-            if(dist > 1){
-
-                enemy.x +=
-                    (dx/dist)*enemy.speed*dt;
-
-                enemy.y +=
-                    (dy/dist)*enemy.speed*dt;
-            }
-
-            enemy.y += enemy.speed*.12*dt;
-        }
-
-        renderEnemy(enemy);
-
-        /*
-           Quái chạm người chơi
-        */
-
-        if(collision(
-            playerRect(),
-            enemyRect(enemy)
-        )){
-
-            damagePlayer(12);
-
-            enemy.x += 60;
-
-            enemy.y += 30;
-        }
-
-        /*
-           Quái rơi ra ngoài màn hình
-        */
-
-        if(enemy.y > rect.height+80){
-
-            enemy.dead = true;
-        }
-    }
-}
-
-/* =========================================================
-   UPDATE PROJECTILES
-========================================================= */
-
-function updateProjectiles(dt){
-
-    const rect = game.getBoundingClientRect();
-
-    for(const p of projectiles){
-
-        if(p.dead) continue;
-
-        p.x += p.vx*dt;
-        p.y += p.vy*dt;
-
-        p.el.style.transform =
-            `translate3d(${p.x}px,${p.y}px,0)`;
-
-        if(
-            p.y < -50 ||
-            p.y > rect.height+50 ||
-            p.x < -50 ||
-            p.x > rect.width+50
-        ){
-            p.dead = true;
-            continue;
-        }
-
-        const pw = 16;
-        const ph = 16;
-
-        for(const enemy of enemies){
-
-            if(enemy.dead) continue;
-
-            if(
-                p.x < enemy.x+enemy.size &&
-                p.x+pw > enemy.x &&
-                p.y < enemy.y+enemy.size &&
-                p.y+ph > enemy.y
-            ){
-
-                damageEnemy(enemy,p.damage || 1);
-
-                p.dead = true;
-
-                break;
-            }
-        }
-    }
-}
-
-/* =========================================================
-   UPDATE BOM
-========================================================= */
-
-function updateBombs(dt){
-
-    const rect = game.getBoundingClientRect();
-
-    for(const bomb of bombs){
-
-        if(bomb.dead) continue;
-
-        bomb.y += bomb.speed*dt;
-
-        bomb.el.style.transform =
-            `translate3d(${bomb.x}px,${bomb.y}px,0)`;
-
-        /*
-           BOM KHÔNG KIỂM TRA QUÁI.
-           CHỈ KIỂM TRA NGƯỜI CHƠI.
-        */
-
-        if(
-            collision(
-                {
-                    x:bomb.x,
-                    y:bomb.y,
-                    w:32,
-                    h:32
-                },
-                playerRect()
-            )
-        ){
-
-            explodeBomb(bomb);
-
-        }
-        else if(bomb.y > rect.height+50){
-
-            bomb.dead = true;
-        }
-    }
-}
-
-/* =========================================================
-   UPDATE FRUITS
-========================================================= */
-
-function updateFruits(dt){
-
-    const rect = game.getBoundingClientRect();
-
-    for(const fruit of fruits){
-
-        if(fruit.dead) continue;
-
-        fruit.y += fruit.speed*dt;
-
-        fruit.el.style.transform =
-            `translate3d(${fruit.x}px,${fruit.y}px,0)`;
-
-        if(
-            collision(
-                {
-                    x:fruit.x,
-                    y:fruit.y,
-                    w:30,
-                    h:30
-                },
-                playerRect()
-            )
-        ){
-
-            collectFruit(fruit);
-
-        }
-        else if(fruit.y > rect.height+50){
-
-            fruit.dead = true;
-        }
-    }
-}
-
-function collectFruit(fruit){
-
-    fruit.dead = true;
-
-    if(fruit.type === "rainbow"){
-
-        score += 50;
-
-        hp = Math.min(100,hp+50);
-
-        hpEl.textContent = hp;
-
-        showMessage("🌈 7 SẮC CẦU VỒNG! +50",1800);
-
-    }
-    else if(fruit.type === "hp"){
-
-        hp = Math.min(100,hp+35);
-
-        hpEl.textContent = hp;
-
-        showMessage("💚 HỒI MÁU +35",1200);
-
-    }
-    else{
-
-        giveRandomSkill();
-    }
-
-    updateScore();
-}
-
-/* =========================================================
-   UPDATE EFFECTS
-========================================================= */
-
-function updateEffects(dt){
-
-    for(const effect of effects){
-
-        if(effect.dead) continue;
-
-        effect.life -= dt*1000;
-
-        if(effect.life <= 0){
-
-            effect.dead = true;
-        }
-    }
-}
-
-/* =========================================================
-   CLEANUP
-   QUAN TRỌNG CHO VIỆC KHÔNG BỊ ĐỨNG
-========================================================= */
-
-function cleanup(){
-
-    enemies =
-        enemies.filter(e=>{
-
-            if(e.dead){
-
-                e.el.remove();
-                frozenEnemies.delete(e);
-
-                return false;
-            }
-
-            return true;
-        });
-
-    projectiles =
-        projectiles.filter(p=>{
-
-            if(p.dead){
-
-                p.el.remove();
-
-                return false;
-            }
-
-            return true;
-        });
-
-    bombs =
-        bombs.filter(b=>{
-
-            if(b.dead){
-
-                b.el.remove();
-
-                return false;
-            }
-
-            return true;
-        });
-
-    fruits =
-        fruits.filter(f=>{
-
-            if(f.dead){
-
-                f.el.remove();
-
-                return false;
-            }
-
-            return true;
-        });
-
-    effects =
-        effects.filter(e=>{
-
-            if(e.dead){
-
-                e.el.remove();
-
-                return false;
-            }
-
-            return true;
-        });
-}
-
-/* =========================================================
-   SKILL LOOP
-========================================================= */
-
-function updateSkillAttack(now){
-
-    if(!currentSkill) return;
-
-    if(currentSkill === "fire"){
-
-        if(now - shootTimer > 350){
-
-            shootTimer = now;
-
-            fireAttack();
-        }
-    }
-
-    else if(currentSkill === "rapid"){
-
-        if(now - shootTimer > 160){
-
-            shootTimer = now;
-
-            rapidShoot();
-        }
-    }
-
-    else if(currentSkill === "laser"){
-
-        if(now - shootTimer > 700){
-
-            shootTimer = now;
-
-            laserAttack();
-        }
-    }
-
-    else if(currentSkill === "lightning"){
-
-        if(now - shootTimer > 650){
-
-            shootTimer = now;
-
-            lightningAttack();
-        }
-    }
-
-    else if(currentSkill === "ice"){
-
-        if(now - shootTimer > 900){
-
-            shootTimer = now;
-
-            iceAttack();
-        }
-    }
-}
-
-/* =========================================================
-   MOVEMENT
-========================================================= */
-
-function updatePlayerMovement(dt){
-
-    let dx = 0;
-    let dy = 0;
-
-    if(input.left) dx--;
-    if(input.right) dx++;
-    if(input.up) dy--;
-    if(input.down) dy++;
-
-    if(dx !== 0 || dy !== 0){
-
-        const length =
-            Math.sqrt(dx*dx+dy*dy);
-
-        dx /= length;
-        dy /= length;
-
-        player.x +=
-            dx*CONFIG.PLAYER_SPEED*dt;
-
-        player.y +=
-            dy*CONFIG.PLAYER_SPEED*dt;
-    }
-
-    clampPlayer();
-    updatePlayer();
-}
-
-/* =========================================================
-   KEYBOARD
-========================================================= */
-
-window.addEventListener("keydown",e=>{
-
-    if(
-        ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "]
-        .includes(e.key)
-    ){
-        e.preventDefault();
-    }
-
-    if(e.key === "ArrowLeft" || e.key.toLowerCase()==="a")
-        input.left=true;
-
-    if(e.key === "ArrowRight" || e.key.toLowerCase()==="d")
-        input.right=true;
-
-    if(e.key === "ArrowUp" || e.key.toLowerCase()==="w")
-        input.up=true;
-
-    if(e.key === "ArrowDown" || e.key.toLowerCase()==="s")
-        input.down=true;
-});
-
-window.addEventListener("keyup",e=>{
-
-    if(e.key === "ArrowLeft" || e.key.toLowerCase()==="a")
-        input.left=false;
-
-    if(e.key === "ArrowRight" || e.key.toLowerCase()==="d")
-        input.right=false;
-
-    if(e.key === "ArrowUp" || e.key.toLowerCase()==="w")
-        input.up=false;
-
-    if(e.key === "ArrowDown" || e.key.toLowerCase()==="s")
-        input.down=false;
-});
-
-/* =========================================================
-   MOBILE BUTTONS
-========================================================= */
-
-function setupButton(id,key){
-
-    const btn = document.getElementById(id);
-
-    const start = e=>{
-        e.preventDefault();
-        input[key]=true;
-    };
-
-    const stop = e=>{
-        e.preventDefault();
-        input[key]=false;
-    };
-
-    btn.addEventListener("pointerdown",start);
-    btn.addEventListener("pointerup",stop);
-    btn.addEventListener("pointercancel",stop);
-    btn.addEventListener("pointerleave",stop);
-}
-
-setupButton("left","left");
-setupButton("right","right");
-setupButton("up","up");
-setupButton("down","down");
-
-/* =========================================================
-   SKILL BUTTONS
-========================================================= */
-
-document.querySelectorAll(".skillBtn").forEach(btn=>{
-
-    btn.addEventListener("click",()=>{
-
-        if(!running) return;
-
-        useSkill(btn.dataset.skill);
-    });
-});
-
-/* =========================================================
-   GAME START
-========================================================= */
-
-function startGame(){
-
-    /*
-       Dọn toàn bộ entity cũ.
-    */
-
-    [...game.querySelectorAll(
-        ".enemy,.bomb,.fruit,.projectile,.fireball,.laser,.lightning,.iceEffect,.explosion"
-    )].forEach(e=>e.remove());
-
-    enemies=[];
-    projectiles=[];
-    bombs=[];
-    fruits=[];
-    effects=[];
-    frozenEnemies.clear();
-
-    score=0;
-    hp=CONFIG.START_HP;
-    level=1;
-
-    currentSkill=null;
-    skillUntil=0;
-
-    spawnTimer=0;
-    fruitTimer=0;
-    bombTimer=0;
-    shootTimer=0;
-    damageCooldown=0;
-
-    scoreEl.textContent="0";
-    hpEl.textContent=hp;
-    levelEl.textContent="1";
-    skillEl.textContent="Không";
-
-    resetPlayer();
-
-    startScreen.style.display="none";
-    gameOverScreen.style.display="none";
-
-    running=true;
-
-    lastTime=performance.now();
-
-    requestAnimationFrame(gameLoop);
+function updateUI(){
+
+  scoreEl.textContent=score;
+  hpEl.textContent=Math.max(0,Math.ceil(hp));
+
+  if(currentSkill){
+
+    skillEl.textContent =
+      skillNames[currentSkill] +
+      " " +
+      Math.ceil(skillTime) +
+      "s";
+  }
+  else{
+
+    skillEl.textContent="Không có";
+  }
 }
 
 /* =========================================================
    GAME OVER
 ========================================================= */
 
-function endGame(){
+let restartTimer=null;
 
-    if(!running) return;
+function gameOver(){
 
-    running=false;
+  running=false;
 
-    finalScoreEl.textContent=score;
+  showMessage(
+    score>=500
+      ? "😳 Ơ HAY, THẰNG NÀY GIỎI THẾ!"
+      : "💀 HẾT MÁU!"
+  );
 
-    if(score > highScore){
+  /*
+    TỰ ĐỘNG CHƠI LẠI
+    Không cần bấm nút
+  */
 
-        highScore=score;
+  clearTimeout(restartTimer);
 
-        localStorage.setItem(
-            "nequai_highscore",
-            highScore
-        );
-    }
+  restartTimer=setTimeout(()=>{
 
-    highScoreEl.textContent=highScore;
-    finalHighEl.textContent=highScore;
+    resetGame();
 
-    /*
-       THÔNG BÁO ĐẶC BIỆT KHI THUA.
-    */
-
-    if(score >= 500){
-
-        setTimeout(()=>{
-            showMessage(
-                "😳 Ơ hay thằng này giỏi thế!",
-                2500
-            );
-        },300);
-    }
-    else if(score >= 200){
-
-        setTimeout(()=>{
-            showMessage(
-                "🐔 Gà thế!",
-                1800
-            );
-        },300);
-    }
-
-    gameOverScreen.style.display="flex";
+  },1800);
 }
 
 /* =========================================================
-   MAIN GAME LOOP
+   RESET
+========================================================= */
+
+function resetGame(){
+
+  enemies.length=0;
+  bullets.length=0;
+  fruits.length=0;
+  bombs.length=0;
+  particles.length=0;
+  effects.length=0;
+
+  score=0;
+  hp=100;
+
+  currentSkill=null;
+  skillTime=0;
+
+  spawnTimer=0;
+  fruitTimer=0;
+  bombTimer=0;
+
+  reached200=false;
+  reached500=false;
+
+  player.x=W/2;
+  player.y=H-70;
+
+  player.invincible=1;
+
+  running=true;
+
+  updateUI();
+}
+
+/* =========================================================
+   DRAW
+========================================================= */
+
+function drawPlayer(){
+
+  if(player.invincible>0 &&
+     Math.floor(performance.now()/80)%2===0){
+    return;
+  }
+
+  ctx.save();
+
+  ctx.fillStyle="#69d84f";
+
+  ctx.fillRect(
+    player.x-18,
+    player.y-18,
+    36,
+    36
+  );
+
+  ctx.fillStyle="#fff";
+
+  ctx.fillRect(
+    player.x-10,
+    player.y-8,
+    7,
+    7
+  );
+
+  ctx.fillRect(
+    player.x+3,
+    player.y-8,
+    7,
+    7
+  );
+
+  ctx.restore();
+}
+
+function drawEnemies(){
+
+  for(const e of enemies){
+
+    ctx.save();
+
+    if(e.frozen>0){
+
+      ctx.shadowBlur=18;
+      ctx.shadowColor="#7dd3fc";
+    }
+
+    ctx.fillStyle=e.color;
+
+    ctx.beginPath();
+    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+    ctx.fill();
+
+    if(e.frozen>0){
+
+      ctx.strokeStyle="#dff8ff";
+      ctx.lineWidth=3;
+
+      ctx.beginPath();
+      ctx.arc(
+        e.x,
+        e.y,
+        e.r+6,
+        0,
+        Math.PI*2
+      );
+
+      ctx.stroke();
+    }
+
+    ctx.fillStyle="#111";
+
+    ctx.fillRect(
+      e.x-e.r*.35,
+      e.y-e.r*.15,
+      5,
+      5
+    );
+
+    ctx.fillRect(
+      e.x+e.r*.1,
+      e.y-e.r*.15,
+      5,
+      5
+    );
+
+    ctx.restore();
+  }
+}
+
+function drawFruits(){
+
+  for(const f of fruits){
+
+    ctx.save();
+
+    if(f.type==="rainbow"){
+
+      const g=ctx.createLinearGradient(
+        f.x-f.r,
+        f.y-f.r,
+        f.x+f.r,
+        f.y+f.r
+      );
+
+      g.addColorStop(0,"red");
+      g.addColorStop(.2,"orange");
+      g.addColorStop(.4,"yellow");
+      g.addColorStop(.6,"lime");
+      g.addColorStop(.8,"cyan");
+      g.addColorStop(1,"violet");
+
+      ctx.fillStyle=g;
+    }
+    else if(f.type==="heal"){
+      ctx.fillStyle="#ff4d6d";
+    }
+    else{
+      ctx.fillStyle="#ef4444";
+    }
+
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+function drawBombs(){
+
+  for(const b of bombs){
+
+    ctx.fillStyle="#202020";
+
+    ctx.beginPath();
+    ctx.arc(
+      b.x,
+      b.y,
+      b.r,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle="#fbbf24";
+
+    ctx.fillRect(
+      b.x-2,
+      b.y-b.r-8,
+      4,
+      8
+    );
+  }
+}
+
+function drawBullets(){
+
+  ctx.fillStyle="#fde047";
+
+  for(const b of bullets){
+
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,5,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawParticles(){
+
+  for(const p of particles){
+
+    ctx.globalAlpha=Math.max(0,p.life);
+
+    ctx.fillStyle=p.color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      3,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+  }
+
+  ctx.globalAlpha=1;
+}
+
+function drawEffects(){
+
+  for(const e of effects){
+
+    const alpha=Math.max(
+      0,
+      e.life/e.maxLife
+    );
+
+    ctx.save();
+
+    ctx.globalAlpha=alpha;
+
+    if(e.type==="fire"){
+
+      ctx.strokeStyle="#ff6b00";
+      ctx.lineWidth=12;
+
+      ctx.beginPath();
+      ctx.arc(
+        e.x,
+        e.y,
+        e.radius*(1-alpha*.3),
+        0,
+        Math.PI*2
+      );
+      ctx.stroke();
+    }
+
+    else if(e.type==="electric"){
+
+      ctx.strokeStyle="#a5f3fc";
+      ctx.lineWidth=4;
+
+      ctx.beginPath();
+
+      ctx.moveTo(e.x1,e.y1);
+
+      const midX=(e.x1+e.x2)/2;
+      const midY=(e.y1+e.y2)/2;
+
+      ctx.lineTo(
+        midX+(Math.random()-.5)*30,
+        midY+(Math.random()-.5)*30
+      );
+
+      ctx.lineTo(e.x2,e.y2);
+
+      ctx.stroke();
+    }
+
+    else if(e.type==="ice"){
+
+      ctx.strokeStyle="#7dd3fc";
+      ctx.lineWidth=5;
+
+      ctx.beginPath();
+
+      ctx.arc(
+        e.x,
+        e.y,
+        e.radius*(1.2-alpha*.2),
+        0,
+        Math.PI*2
+      );
+
+      ctx.stroke();
+    }
+
+    else if(e.type==="explosion"){
+
+      ctx.strokeStyle="#fb923c";
+      ctx.lineWidth=8;
+
+      ctx.beginPath();
+
+      ctx.arc(
+        e.x,
+        e.y,
+        e.radius*(1-alpha),
+        0,
+        Math.PI*2
+      );
+
+      ctx.stroke();
+    }
+
+    else if(e.type==="laser"){
+
+      ctx.strokeStyle="#f0abfc";
+      ctx.shadowBlur=25;
+      ctx.shadowColor="#e879f9";
+      ctx.lineWidth=22;
+
+      ctx.beginPath();
+
+      ctx.moveTo(player.x,0);
+      ctx.lineTo(player.x,H);
+
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+function draw(){
+
+  ctx.clearRect(0,0,W,H);
+
+  drawFruits();
+  drawBombs();
+  drawBullets();
+  drawEnemies();
+  drawEffects();
+  drawParticles();
+  drawPlayer();
+}
+
+/* =========================================================
+   MAIN LOOP
 ========================================================= */
 
 function gameLoop(now){
 
-    if(!running) return;
+  /*
+    Giới hạn delta để nếu tab bị lag
+    game không chạy một bước quá lớn
+  */
 
-    /*
-       QUAN TRỌNG:
-       Giới hạn delta time.
-       Nếu tab bị lag/đứng một lúc thì game không
-       chạy một bước khổng lồ gây lỗi.
-    */
+  let dt=(now-lastTime)/1000;
 
-    let dt =
-        Math.min((now-lastTime)/1000,0.033);
+  if(dt>0.05) dt=0.05;
 
-    lastTime=now;
+  lastTime=now;
 
-    damageCooldown =
-        Math.max(0,damageCooldown-dt*1000);
+  if(running){
 
-    updatePlayerMovement(dt);
-
-    updateSkill(now);
-
-    updateSkillAttack(now);
-
-    spawnTimer += dt;
-    fruitTimer += dt;
-    bombTimer += dt;
-
-    /*
-       Spawn quái.
-       Khi màn càng cao thì spawn nhanh hơn nhưng
-       vẫn bị giới hạn MAX_ENEMIES.
-    */
-
-    const spawnDelay =
-        Math.max(0.35,1.15-level*0.025);
-
-    if(spawnTimer >= spawnDelay){
-
-        spawnTimer=0;
-
-        createEnemy();
-    }
-
-    /*
-       Trái cây
-    */
-
-    if(fruitTimer >= 5){
-
-        fruitTimer=0;
-
-        createFruit();
-    }
-
-    /*
-       Bom
-    */
-
-    if(bombTimer >= 7){
-
-        bombTimer=0;
-
-        createBomb();
-    }
-
-    updateEnemies(dt,now);
-    updateProjectiles(dt);
-    updateBombs(dt);
+    updatePlayer(dt);
+    updateEnemies(dt);
+    updateBullets(dt);
     updateFruits(dt);
+    updateBombs(dt);
     updateEffects(dt);
+    updateParticles(dt);
 
-    cleanup();
+    /* spawn quái */
 
-    requestAnimationFrame(gameLoop);
+    spawnTimer-=dt;
+
+    const spawnRate=
+      Math.max(.35,1.15-score*.003);
+
+    if(spawnTimer<=0){
+
+      spawnEnemy();
+
+      spawnTimer=spawnRate;
+    }
+
+    /* trái cây */
+
+    fruitTimer-=dt;
+
+    if(fruitTimer<=0){
+
+      spawnFruit();
+
+      tryRainbow();
+      tryHeal();
+
+      fruitTimer=
+        5+Math.random()*4;
+    }
+
+    /* bom */
+
+    bombTimer-=dt;
+
+    if(bombTimer<=0){
+
+      spawnBomb();
+
+      bombTimer=
+        4+Math.random()*5;
+    }
+
+    /* skill */
+
+    if(skillTime>0){
+
+      skillTime-=dt;
+
+      if(skillTime<=0){
+
+        skillTime=0;
+        currentSkill=null;
+
+        skillEl.textContent="Không có";
+      }
+    }
+
+    if(skillCooldown>0){
+      skillCooldown-=dt;
+    }
+
+    updateUI();
+  }
+
+  draw();
+
+  requestAnimationFrame(gameLoop);
 }
 
 /* =========================================================
-   START BUTTON
+   BUTTONS
 ========================================================= */
 
-startBtn.addEventListener("click",startGame);
+document
+.getElementById("skillBtn")
+.addEventListener("click",useSkill);
 
-restartBtn.addEventListener("click",startGame);
+document
+.getElementById("restartBtn")
+.addEventListener("click",resetGame);
 
 /* =========================================================
-   RESIZE
+   START
 ========================================================= */
 
-window.addEventListener("resize",()=>{
+resizeCanvas();
 
-    if(!running) return;
+player.x=W/2;
+player.y=H-70;
 
-    clampPlayer();
-    updatePlayer();
-});
+updateUI();
 
-/* =========================================================
-   KHỞI TẠO
-========================================================= */
+requestAnimationFrame(gameLoop);
 
-resetPlayer();
 </script>
 
-</body>
-</html>
+</bo
+```
