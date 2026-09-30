@@ -276,7 +276,7 @@ button{
 
 <p class="small">
     📱 Điện thoại: giữ ⬅️ ➡️ để di chuyển<br>
-    🖥️ PC: dùng ← → hoặc A / D
+    🖥️ PC: dùng phím ← →
 </p>
 
 </div>
@@ -383,7 +383,6 @@ let running = false;
 let lastTime = 0;
 let animationId = 0;
 
-let restartTimer = null;
 
 
 /* =====================================================
@@ -474,8 +473,6 @@ function resetGame(){
     skillTime = 0;
 
 
-    reached200 = false;
-    reached500 = false;
 
 
     keys.left = false;
@@ -569,7 +566,7 @@ function updateScore(){
         reached200 = true;
 
         showMessage(
-            "🐔 ÔI GÀ THẾ!"
+            ""
         );
     }
 
@@ -586,7 +583,7 @@ function updateScore(){
         reached500 = true;
 
         showMessage(
-            "😳 Ơ HAY, THẰNG NÀY GIỎI THẾ!"
+            ""
         );
     }
 }
@@ -892,9 +889,6 @@ function giveRandomSkill(){
 
     skillTime = 15;
 
-
-    showMessage(currentSkill);
-
     updateUI();
 }
 
@@ -1005,8 +999,6 @@ function gameOver(){
     /*
        TỰ ĐỘNG CHƠI LẠI
     */
-
-    clearTimeout(restartTimer);
 
 
     restartTimer =
@@ -1261,14 +1253,21 @@ function updateFruits(dt){
                 "rainbow"
             ){
 
-                currentSkill =
-                    "🌈 7 Sắc";
+                const rainbowRoll = Math.random();
 
-                skillTime = 25;
-
-                showMessage(
-                    "🌈 7 SẮC CẦU VỒNG!"
-                );
+                if(rainbowRoll < 0.34){
+                    currentSkill = "🌈 Khiên Lửa";
+                    skillTime = 25;
+                }else if(rainbowRoll < 0.67){
+                    currentSkill = "🌈 Song Hỏa";
+                    skillTime = 25;
+                }else{
+                    currentSkill = "🌈 Hồi 2 Tim";
+                    if(typeof hp === "number"){
+                        hp = Math.min(5, hp + 2);
+                    }
+                    skillTime = 3;
+                }
             }
 
 
@@ -1611,7 +1610,7 @@ function useSkill(dt){
         ||
 
         currentSkill ===
-        "🌈 7 Sắc"
+        "🌈 Khiên Lửa"
 
     ){
 
@@ -1677,6 +1676,46 @@ function updateParticles(dt){
 }
 
 
+
+/* =====================================================
+   DỌN RÁC - XÓA MỌI OBJECT RA KHỎI MÀN HÌNH
+===================================================== */
+function cleanupOffscreen(){
+    enemies = enemies.filter(e =>
+        e.x > -e.size - 20 &&
+        e.x < W + e.size + 20 &&
+        e.y < H + e.size + 20
+    );
+
+    bombs = bombs.filter(b =>
+        b.x > -b.radius - 20 &&
+        b.x < W + b.radius + 20 &&
+        b.y < H + b.radius + 20
+    );
+
+    fruits = fruits.filter(f =>
+        f.x > -40 &&
+        f.x < W + 40 &&
+        f.y < H + 40
+    );
+
+    bullets = bullets.filter(b =>
+        b.x > -30 &&
+        b.x < W + 30 &&
+        b.y > -30 &&
+        b.y < H + 30
+    );
+
+    particles = particles.filter(p =>
+        p.x > -40 &&
+        p.x < W + 40 &&
+        p.y > -40 &&
+        p.y < H + 40 &&
+        p.life > 0
+    );
+}
+
+
 /* =====================================================
    DRAW
 ===================================================== */
@@ -1695,15 +1734,19 @@ function draw(){
     );
 
 
-    ctx.fillStyle =
-        "#18243a";
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#101b31");
+    bg.addColorStop(.55, "#182a46");
+    bg.addColorStop(1, "#10233a");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
 
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
+    // Ánh sáng nền tạo chiều sâu
+    const glow = ctx.createRadialGradient(W/2, H*.38, 10, W/2, H*.38, 360);
+    glow.addColorStop(0, "rgba(70,130,210,.10)");
+    glow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
 
 
     /*
@@ -1736,68 +1779,173 @@ function draw(){
        GROUND
     */
 
-    ctx.fillStyle =
-        "#4d7c59";
-
-    ctx.fillRect(
-        0,
-        395,
-        W,
-        25
-    );
+    const groundGradient = ctx.createLinearGradient(0, 395, 0, H);
+    groundGradient.addColorStop(0, "#4f9a62");
+    groundGradient.addColorStop(1, "#285b3b");
+    ctx.fillStyle = groundGradient;
+    ctx.fillRect(0, 395, W, 25);
 
 
     /*
-       PLAYER
+       PLAYER — NHÂN VẬT MỚI
     */
 
     if(player){
 
-        ctx.fillStyle =
-            "#77b255";
+        ctx.save();
 
+        const px = player.x;
+        const py = player.y;
 
-        ctx.fillRect(
+        // Bóng chân
+        ctx.fillStyle = "rgba(0,0,0,.35)";
+        ctx.beginPath();
+        ctx.ellipse(px, py+24, 27, 8, 0, 0, Math.PI*2);
+        ctx.fill();
 
-            player.x-
-            player.width/2,
+        // Jet/giày
+        const shoe = ctx.createLinearGradient(px-18,py+10,px+18,py+27);
+        shoe.addColorStop(0,"#79a7ff");
+        shoe.addColorStop(.5,"#3157b7");
+        shoe.addColorStop(1,"#14265c");
+        ctx.fillStyle = shoe;
 
-            player.y-
-            player.height/2,
+        ctx.beginPath();
+        ctx.roundRect(px-19,py+10,14,15,6);
+        ctx.roundRect(px+5,py+10,14,15,6);
+        ctx.fill();
 
-            player.width,
+        // Ánh sáng dưới giày
+        ctx.fillStyle = "rgba(75,220,255,.7)";
+        ctx.beginPath();
+        ctx.ellipse(px-12,py+26,7,2,0,0,Math.PI*2);
+        ctx.ellipse(px+12,py+26,7,2,0,0,Math.PI*2);
+        ctx.fill();
 
-            player.height
+        // Thân robot
+        const body = ctx.createLinearGradient(px-22,py-2,px+22,py+18);
+        body.addColorStop(0,"#7de8ff");
+        body.addColorStop(.35,"#3b9ed5");
+        body.addColorStop(.7,"#2760a8");
+        body.addColorStop(1,"#142d63");
+
+        ctx.fillStyle = body;
+        ctx.beginPath();
+        ctx.roundRect(px-22,py-8,44,28,14);
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(210,250,255,.85)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Lõi năng lượng
+        const core = ctx.createRadialGradient(px,py+6,1,px,py+6,9);
+        core.addColorStop(0,"#ffffff");
+        core.addColorStop(.3,"#8fffff");
+        core.addColorStop(1,"rgba(50,180,255,0)");
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(px,py+6,9,0,Math.PI*2);
+        ctx.fill();
+
+        // Đầu tròn lớn
+        const head = ctx.createRadialGradient(
+            px-9,py-24,2,
+            px,py-17,27
         );
+        head.addColorStop(0,"#ffffff");
+        head.addColorStop(.15,"#dff8ff");
+        head.addColorStop(.48,"#6bb7e8");
+        head.addColorStop(.8,"#2d609e");
+        head.addColorStop(1,"#142a58");
 
+        ctx.fillStyle = head;
+        ctx.beginPath();
+        ctx.arc(px,py-18,27,0,Math.PI*2);
+        ctx.fill();
 
-        /*
-           MẮT
-        */
+        ctx.strokeStyle = "#bdefff";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
 
-        ctx.fillStyle =
-            "#fff";
+        // Kính visor đen/xanh
+        const visor = ctx.createLinearGradient(px-19,py-28,px+19,py-8);
+        visor.addColorStop(0,"#bdf8ff");
+        visor.addColorStop(.18,"#4cd7f5");
+        visor.addColorStop(.5,"#102d50");
+        visor.addColorStop(1,"#061326");
 
+        ctx.fillStyle = visor;
+        ctx.beginPath();
+        ctx.ellipse(px,py-17,20,13,0,0,Math.PI*2);
+        ctx.fill();
 
-        ctx.fillRect(
-            player.x-12,
-            player.y-5,
-            7,
-            7
-        );
+        ctx.strokeStyle = "rgba(220,255,255,.9)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
 
+        // Hai mắt phát sáng
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#6fffff";
+        ctx.fillStyle = "#eaffff";
 
-        ctx.fillRect(
-            player.x+5,
-            player.y-5,
-            7,
-            7
-        );
+        ctx.beginPath();
+        ctx.roundRect(px-12,py-21,7,5,2);
+        ctx.roundRect(px+5,py-21,7,5,2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // Highlight kính
+        ctx.fillStyle = "rgba(255,255,255,.5)";
+        ctx.beginPath();
+        ctx.ellipse(px-9,py-25,8,3,-.35,0,Math.PI*2);
+        ctx.fill();
+
+        // Anten
+        ctx.strokeStyle = "#8ceeff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(px,py-44);
+        ctx.lineTo(px,py-53);
+        ctx.stroke();
+
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#55eaff";
+        ctx.fillStyle = "#dfffff";
+        ctx.beginPath();
+        ctx.arc(px,py-55,4,0,Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Tay robot
+        const arm = ctx.createLinearGradient(px-30,py-8,px-23,py+12);
+        arm.addColorStop(0,"#8beaff");
+        arm.addColorStop(1,"#24518c");
+        ctx.fillStyle = arm;
+
+        ctx.beginPath();
+        ctx.roundRect(px-31,py-5,10,22,5);
+        ctx.roundRect(px+21,py-5,10,22,5);
+        ctx.fill();
+
+        // Vạch giáp
+        ctx.strokeStyle = "rgba(255,255,255,.35)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(px-16,py+15);
+        ctx.lineTo(px+16,py+15);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
 
     /*
-       KHIÊN
+       🛡️ KHIÊN
+    */
+
+ — 3D
     */
 
     if(
@@ -1806,27 +1954,176 @@ function draw(){
         "🛡️ Khiên"
     ){
 
-        ctx.strokeStyle =
-            "#72edff";
+        ctx.save();
 
-        ctx.lineWidth = 5;
+        const pulse =
+            35 +
+            Math.sin(performance.now()/150)*3;
 
-        ctx.beginPath();
-
-        ctx.arc(
+        const shieldGlow = ctx.createRadialGradient(
             player.x,
             player.y,
-            35,
-            0,
-            Math.PI*2
+            25,
+            player.x,
+            player.y,
+            55
         );
 
+        shieldGlow.addColorStop(
+            0,
+            "rgba(80,230,255,.24)"
+        );
+
+        shieldGlow.addColorStop(
+            .65,
+            "rgba(50,170,255,.12)"
+        );
+
+        shieldGlow.addColorStop(
+            1,
+            "rgba(30,130,255,0)"
+        );
+
+        ctx.fillStyle = shieldGlow;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, 55, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(120,245,255,.35)";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, pulse, 0, Math.PI*2);
         ctx.stroke();
+
+        ctx.strokeStyle = "#d9fbff";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, pulse-3, 0, Math.PI*2);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
 
     /*
-       🔥 LỬA
+       🌈 KHIÊN LỬA — 7 SẮC
+    */
+
+    if(
+        player &&
+        currentSkill ===
+        "🌈 Khiên Lửa"
+    ){
+
+        ctx.save();
+
+        const t =
+            performance.now()/230;
+
+        // Aura
+        const aura = ctx.createRadialGradient(
+            player.x,
+            player.y,
+            24,
+            player.x,
+            player.y,
+            75
+        );
+
+        aura.addColorStop(
+            0,
+            "rgba(255,235,90,.22)"
+        );
+
+        aura.addColorStop(
+            .42,
+            "rgba(255,110,20,.22)"
+        );
+
+        aura.addColorStop(
+            1,
+            "rgba(255,30,0,0)"
+        );
+
+        ctx.fillStyle = aura;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, 75, 0, Math.PI*2);
+        ctx.fill();
+
+        // 3 vòng lửa
+        const fireColors = [
+            "#fff3a1",
+            "#ff9f1c",
+            "#ff3d16"
+        ];
+
+        for(let r=0; r<3; r++){
+
+            ctx.strokeStyle = fireColors[r];
+            ctx.lineWidth = 6-r;
+
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = fireColors[r];
+
+            ctx.beginPath();
+
+            ctx.arc(
+                player.x,
+                player.y,
+                39+r*5,
+                t*(1.2+r*.25)+r,
+                t*(1.2+r*.25)+r + Math.PI*1.72
+            );
+
+            ctx.stroke();
+        }
+
+        // Cục lửa quay quanh người
+        for(let i=0; i<10; i++){
+
+            const a =
+                t*1.35 +
+                i*Math.PI*2/10;
+
+            const rr =
+                48 +
+                Math.sin(t*2+i)*3;
+
+            const fx =
+                player.x +
+                Math.cos(a)*rr;
+
+            const fy =
+                player.y +
+                Math.sin(a)*rr;
+
+            const flame =
+                4 +
+                (i%3)*1.5;
+
+            ctx.fillStyle =
+                i%2
+                    ? "#ff6a00"
+                    : "#ffe66b";
+
+            ctx.beginPath();
+            ctx.arc(
+                fx,
+                fy,
+                flame,
+                0,
+                Math.PI*2
+            );
+            ctx.fill();
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.restore();
+    }
+
+
+    /*
+       🔥 PHUN LỬA — NÓN LỬA 3D
     */
 
     if(
@@ -1835,53 +2132,75 @@ function draw(){
         "🔥 Phun lửa"
     ){
 
-        const gradient =
+        ctx.save();
+
+        const flamePulse =
+            1 +
+            Math.sin(performance.now()/90)*.08;
+
+        ctx.translate(
+            player.x,
+            player.y-20
+        );
+
+        ctx.scale(
+            flamePulse,
+            flamePulse
+        );
+
+        const fire =
             ctx.createRadialGradient(
-                player.x,
-                player.y-100,
-                10,
-                player.x,
-                player.y-100,
-                120
+                0,
+                -95,
+                5,
+                0,
+                -95,
+                125
             );
 
-
-        gradient.addColorStop(
+        fire.addColorStop(
             0,
-            "rgba(255,220,50,.7)"
+            "rgba(255,255,220,.95)"
         );
 
-        gradient.addColorStop(
-            .5,
-            "rgba(255,80,20,.3)"
+        fire.addColorStop(
+            .18,
+            "rgba(255,235,80,.95)"
         );
 
-        gradient.addColorStop(
+        fire.addColorStop(
+            .48,
+            "rgba(255,105,15,.72)"
+        );
+
+        fire.addColorStop(
             1,
-            "rgba(255,50,0,0)"
+            "rgba(255,35,0,0)"
         );
 
-
-        ctx.fillStyle =
-            gradient;
-
+        ctx.fillStyle = fire;
 
         ctx.beginPath();
-
-        ctx.arc(
-            player.x,
-            player.y-100,
-            120,
-            0,
-            Math.PI*2
+        ctx.moveTo(-22, 0);
+        ctx.bezierCurveTo(
+            -60,-55,
+            -48,-150,
+            0,-185
         );
-
+        ctx.bezierCurveTo(
+            48,-150,
+            60,-55,
+            22,0
+        );
+        ctx.closePath();
         ctx.fill();
+
+        ctx.restore();
     }
 
 
     /*
-       ⚡ ĐIỆN
+       ⚡ TIA ĐIỆN — ZIGZAG
     */
 
     if(
@@ -1890,37 +2209,64 @@ function draw(){
         "⚡ Tia điện"
     ){
 
-        ctx.strokeStyle =
-            "#d78cff";
+        ctx.save();
 
-        ctx.lineWidth = 7;
+        const flicker =
+            Math.sin(performance.now()/45);
+
+        ctx.shadowBlur = 24;
+        ctx.shadowColor = "#b86cff";
+
+        ctx.strokeStyle =
+            "rgba(170,90,255,.45)";
+
+        ctx.lineWidth = 14;
 
         ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
 
-        ctx.moveTo(
-            player.x,
-            0
-        );
+        for(let i=1; i<=9; i++){
 
-        ctx.lineTo(
-            player.x,
-            player.y
-        );
+            const yy =
+                player.y -
+                i*(player.y/9);
+
+            const xx =
+                player.x +
+                Math.sin(i*2.4+flicker)*16;
+
+            ctx.lineTo(xx, yy);
+        }
+
+        ctx.stroke();
+
+        ctx.strokeStyle = "#f7eaff";
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+
+        for(let i=1; i<=9; i++){
+
+            const yy =
+                player.y -
+                i*(player.y/9);
+
+            const xx =
+                player.x +
+                Math.sin(i*2.4+flicker)*16;
+
+            ctx.lineTo(xx, yy);
+        }
 
         ctx.stroke();
 
-
-        ctx.strokeStyle =
-            "#fff";
-
-        ctx.lineWidth = 2;
-
-        ctx.stroke();
+        ctx.restore();
     }
 
 
     /*
-       ❄️ BĂNG
+       ❄️ TIA BĂNG — TINH THỂ 3D
     */
 
     if(
@@ -1929,84 +2275,222 @@ function draw(){
         "❄️ Tia băng"
     ){
 
-        ctx.strokeStyle =
-            "#67e8ff";
+        ctx.save();
 
-        ctx.lineWidth = 10;
+        const ice =
+            ctx.createLinearGradient(
+                player.x-18,
+                player.y,
+                player.x+18,
+                0
+            );
 
+        ice.addColorStop(
+            0,
+            "rgba(30,180,255,.18)"
+        );
+
+        ice.addColorStop(
+            .5,
+            "rgba(220,255,255,.72)"
+        );
+
+        ice.addColorStop(
+            1,
+            "rgba(70,210,255,.08)"
+        );
+
+        ctx.fillStyle = ice;
         ctx.beginPath();
+        ctx.moveTo(player.x-16, player.y);
+        ctx.lineTo(player.x-7, 8);
+        ctx.lineTo(player.x, 0);
+        ctx.lineTo(player.x+7, 8);
+        ctx.lineTo(player.x+16, player.y);
+        ctx.closePath();
+        ctx.fill();
 
-        ctx.moveTo(
-            player.x,
-            0
-        );
-
-        ctx.lineTo(
-            player.x,
-            player.y
-        );
-
+        ctx.strokeStyle = "#dffcff";
+        ctx.lineWidth = 2;
         ctx.stroke();
 
+        // tinh thể hai bên
+        for(let side of [-1,1]){
 
-        ctx.strokeStyle =
-            "#fff";
+            ctx.fillStyle =
+                "rgba(120,235,255,.72)";
 
-        ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(player.x+side*7, player.y-40);
+            ctx.lineTo(player.x+side*23, player.y-90);
+            ctx.lineTo(player.x+side*12, player.y-100);
+            ctx.closePath();
+            ctx.fill();
+        }
 
-        ctx.stroke();
+        ctx.restore();
     }
 
 
+
     /*
-       🔆 LASER / 🌈
+       🔥 PHUN LỬA — TIA LỬA 3D
+    */
+    if(player && currentSkill === "🔥 Phun lửa"){
+
+        ctx.save();
+
+        const t = performance.now()/80;
+
+        const g = ctx.createLinearGradient(
+            player.x, player.y, player.x, 0
+        );
+        g.addColorStop(0, "#fffbd7");
+        g.addColorStop(.18, "#ffe66d");
+        g.addColorStop(.45, "#ff8a1c");
+        g.addColorStop(.72, "#ff3b12");
+        g.addColorStop(1, "rgba(255,30,0,0)");
+
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = "#ff5a00";
+
+        ctx.strokeStyle = "rgba(255,80,10,.25)";
+        ctx.lineWidth = 30;
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + Math.sin(t)*18, 0);
+        ctx.stroke();
+
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 13;
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + Math.sin(t)*18, 0);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#fffef0";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + Math.sin(t)*18, 0);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    /*
+       ❄️ BĂNG — TIA BĂNG 3D
+    */
+    if(player && currentSkill === "❄️ Tia băng"){
+
+        ctx.save();
+
+        const t = performance.now()/120;
+
+        const g = ctx.createLinearGradient(
+            player.x, player.y, player.x, 0
+        );
+        g.addColorStop(0, "#ffffff");
+        g.addColorStop(.18, "#bffaff");
+        g.addColorStop(.5, "#50dcff");
+        g.addColorStop(1, "rgba(70,210,255,0)");
+
+        ctx.shadowBlur = 28;
+        ctx.shadowColor = "#48dfff";
+
+        ctx.strokeStyle = "rgba(70,220,255,.22)";
+        ctx.lineWidth = 28;
+        ctx.beginPath();
+        ctx.moveTo(player.x,player.y);
+        ctx.lineTo(player.x+Math.sin(t)*9,0);
+        ctx.stroke();
+
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(player.x,player.y);
+        ctx.lineTo(player.x+Math.sin(t)*9,0);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(player.x,player.y);
+        ctx.lineTo(player.x+Math.sin(t)*9,0);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    /*
+       🔆 LASER — TIA 3 LỚP
     */
 
     if(
         player &&
-
-        (
-            currentSkill ===
-            "🔆 Laser"
-
-            ||
-
-            currentSkill ===
-            "🌈 7 Sắc"
-        )
-
+        currentSkill ===
+        "🔆 Laser"
     ){
 
+        ctx.save();
+
+        const laser =
+            ctx.createLinearGradient(
+                player.x-15,
+                player.y,
+                player.x+15,
+                0
+            );
+
+        laser.addColorStop(
+            0,
+            "rgba(255,20,210,.12)"
+        );
+
+        laser.addColorStop(
+            .45,
+            "rgba(255,90,245,.82)"
+        );
+
+        laser.addColorStop(
+            .55,
+            "rgba(255,255,255,.98)"
+        );
+
+        laser.addColorStop(
+            1,
+            "rgba(255,20,210,.12)"
+        );
+
+        ctx.shadowBlur = 28;
+        ctx.shadowColor = "#ff36df";
+
         ctx.strokeStyle =
-            currentSkill ===
-            "🌈 7 Sắc"
-            ? "#ff55ff"
-            : "#ff55ff";
-
-
-        ctx.lineWidth = 16;
+            "rgba(255,45,220,.35)";
+        ctx.lineWidth = 24;
 
         ctx.beginPath();
-
-        ctx.moveTo(
-            player.x,
-            0
-        );
-
-        ctx.lineTo(
-            player.x,
-            player.y
-        );
-
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x, 0);
         ctx.stroke();
 
+        ctx.strokeStyle = laser;
+        ctx.lineWidth = 9;
 
-        ctx.strokeStyle =
-            "#fff";
-
-        ctx.lineWidth = 4;
-
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x, 0);
         ctx.stroke();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2.5;
+
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x, 0);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
 
@@ -2014,24 +2498,23 @@ function draw(){
        BULLETS
     */
 
+
+
     for(
         const b of bullets
     ){
 
-        ctx.fillStyle =
-            "#ffe66b";
-
-
-        ctx.fillRect(
-
-            b.x-3,
-
-            b.y-8,
-
-            6,
-
-            12
-        );
+        const bg = ctx.createLinearGradient(b.x-4, b.y-10, b.x+4, b.y+10);
+        bg.addColorStop(0, "#fffbd0");
+        bg.addColorStop(.45, "#ffe66b");
+        bg.addColorStop(1, "#ff9f1c");
+        ctx.fillStyle = bg;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#ffe66b";
+        ctx.beginPath();
+        ctx.roundRect(b.x-4, b.y-10, 8, 20, 4);
+        ctx.fill();
+        ctx.shadowBlur = 0;
     }
 
 
@@ -2071,45 +2554,40 @@ function draw(){
         }
 
 
-        ctx.fillStyle =
-            enemyColor;
+        ctx.save();
 
-
-        ctx.fillRect(
-
-            e.x-
-            e.size/2,
-
-            e.y-
-            e.size/2,
-
-            e.size,
-
-            e.size
+        // Quái hình tròn + gradient + viền sáng
+        const eg = ctx.createRadialGradient(
+            e.x-e.size*.18, e.y-e.size*.25, 2,
+            e.x, e.y, e.size*.62
         );
+        eg.addColorStop(0, "#ffffff");
+        eg.addColorStop(.12, enemyColor);
+        eg.addColorStop(1, enemyColor);
+        ctx.fillStyle = eg;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
+        ctx.fill();
 
+        ctx.strokeStyle = "rgba(255,255,255,.5)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
-        /*
-           MẮT
-        */
+        // Mắt
+        ctx.fillStyle = "#10131a";
+        ctx.beginPath();
+        ctx.arc(e.x-e.size*.18, e.y-e.size*.08, Math.max(3, e.size*.11), 0, Math.PI*2);
+        ctx.arc(e.x+e.size*.18, e.y-e.size*.08, Math.max(3, e.size*.11), 0, Math.PI*2);
+        ctx.fill();
 
-        ctx.fillStyle =
-            "#111";
+        // Miệng
+        ctx.strokeStyle = "#10131a";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y+e.size*.08, e.size*.18, 0.15, Math.PI-0.15);
+        ctx.stroke();
 
-
-        ctx.fillRect(
-            e.x-9,
-            e.y-7,
-            6,
-            6
-        );
-
-        ctx.fillRect(
-            e.x+3,
-            e.y-7,
-            6,
-            6
-        );
+        ctx.restore();
 
 
         /*
@@ -2243,16 +2721,43 @@ function draw(){
             );
 
 
+        const particleGradient =
+            ctx.createRadialGradient(
+                p.x,
+                p.y,
+                0,
+                p.x,
+                p.y,
+                5
+            );
+
+        particleGradient.addColorStop(
+            0,
+            "#ffffff"
+        );
+
+        particleGradient.addColorStop(
+            .45,
+            "#ffd166"
+        );
+
+        particleGradient.addColorStop(
+            1,
+            "rgba(255,120,30,0)"
+        );
+
         ctx.fillStyle =
-            "#ffd166";
+            particleGradient;
 
-
-        ctx.fillRect(
+        ctx.beginPath();
+        ctx.arc(
             p.x,
             p.y,
-            4,
-            4
+            4.5,
+            0,
+            Math.PI*2
         );
+        ctx.fill();
     }
 
 
@@ -2475,6 +2980,7 @@ function gameLoop(now){
     updateBullets(dt);
 
     updateParticles(dt);
+    cleanupOffscreen();
 
 
     /*
@@ -2502,8 +3008,6 @@ function gameLoop(now){
 ===================================================== */
 
 function startGame(){
-
-    clearTimeout(restartTimer);
 
     cancelAnimationFrame(
         animationId
@@ -2627,13 +3131,8 @@ window.addEventListener(
     "keydown",
     function(e){
 
-        const key =
-            e.key.toLowerCase();
-
-
         if(
-            e.key === "ArrowLeft" ||
-            key === "a"
+            e.key === "ArrowLeft"
         ){
 
             e.preventDefault();
@@ -2643,8 +3142,7 @@ window.addEventListener(
 
 
         if(
-            e.key === "ArrowRight" ||
-            key === "d"
+            e.key === "ArrowRight"
         ){
 
             e.preventDefault();
@@ -2658,10 +3156,6 @@ window.addEventListener(
 window.addEventListener(
     "keyup",
     function(e){
-
-        const key =
-            e.key.toLowerCase();
-
 
         if(
             e.key === "ArrowLeft" ||
@@ -2736,4 +3230,3 @@ setTimeout(
 
 </body>
 </html>
-```
