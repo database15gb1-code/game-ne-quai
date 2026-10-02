@@ -368,109 +368,59 @@ button{
     }
 }
 
-/* Chế độ chơi ngang trên điện thoại */
-#orientationHint{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:20000;
-    background:rgba(5,10,20,.96);
-    color:#fff;
+/* Chọn kiểu màn hình chơi trên điện thoại */
+#orientationChoice{
+    display:flex;
     align-items:center;
     justify-content:center;
-    flex-direction:column;
-    gap:12px;
-    padding:24px;
-    font-size:22px;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:10px auto 4px;
+    font-size:14px;
     font-weight:800;
-    text-align:center;
 }
 
-#orientationHint .rotateIcon{
-    font-size:70px;
-    animation:rotatePhone 1.5s ease-in-out infinite;
+#orientationChoice button{
+    border:0;
+    border-radius:12px;
+    padding:10px 14px;
+    font-size:14px;
+    font-weight:900;
+    cursor:pointer;
+    background:rgba(255,255,255,.12);
+    color:inherit;
+    border:1px solid rgba(255,255,255,.2);
 }
 
-@keyframes rotatePhone{
-    0%,100%{transform:rotate(0deg)}
-    50%{transform:rotate(90deg)}
+#orientationChoice button:active{
+    transform:scale(.97);
 }
 
-@media(max-width:900px) and (orientation:landscape){
-    html,body{
-        width:100%;
-        height:100%;
-        overflow:hidden;
+@media(max-width:520px){
+    #orientationChoice{
+        font-size:13px;
+        gap:6px;
     }
-
-    .wrap{
-        max-width:none;
-        width:100%;
-        height:100vh;
-        padding:3px 8px;
-    }
-
-    h1{
-        margin:2px 0 3px;
-        font-size:20px;
-    }
-
-    .top{
-        gap:4px;
-        margin-bottom:3px;
-        font-size:11px;
-    }
-
-    .info{
-        padding:3px 6px;
-        border-radius:7px;
-    }
-
-    canvas{
-        width:min(96vw, 1000px);
-        max-width:96vw;
-        max-height:calc(100vh - 128px);
-        height:auto;
-        border-width:2px;
-    }
-
-    #start,#soundToggle,#shopButton{
-        margin:3px 2px;
-        padding:7px 12px;
+    #orientationChoice button{
+        padding:9px 11px;
         font-size:13px;
     }
-
-    .controls{
-        position:fixed;
-        left:0;
-        right:0;
-        bottom:5px;
-        margin:0;
-        z-index:1000;
-        justify-content:space-between;
-        padding:0 12px;
-        pointer-events:none;
-    }
-
-    .move{
-        width:92px;
-        height:58px;
-        font-size:32px;
-        opacity:.86;
-        pointer-events:auto;
-    }
-
-    .small{
-        display:none;
-    }
 }
 
-@media(max-width:900px) and (orientation:portrait){
-    #orientationHint{
-        display:flex;
-    }
-}
+</style>
 
+<style>
+/* ✨ Skin shop nâng cấp */
+.skinPreview{position:relative;display:grid;place-items:center;font-size:42px;min-height:72px;border-radius:18px;overflow:hidden;}
+.skinPreview::before{content:"";position:absolute;inset:12px;border-radius:50%;border:2px solid currentColor;opacity:.45;animation:skinPulse 1.8s ease-in-out infinite;}
+.skinPreview::after{content:"✦  ·  ✦";position:absolute;bottom:4px;font-size:10px;letter-spacing:6px;opacity:.7;}
+.skin-neon{color:#45eaff;text-shadow:0 0 14px #45eaff,0 0 28px #8fffff;}
+.skin-fire{color:#ff5a18;text-shadow:0 0 14px #ff5a18,0 0 30px #ffd45a;}
+.skin-ice{color:#62eaff;text-shadow:0 0 14px #62eaff,0 0 30px #fff;}
+.skin-leaf{color:#61df76;text-shadow:0 0 14px #61df76,0 0 28px #dfff8a;}
+.skin-octopus{color:#bd67ff;text-shadow:0 0 14px #bd67ff,0 0 30px #f2b8ff;}
+.skin-devil{color:#ff3154;text-shadow:0 0 14px #ff3154,0 0 30px #ff9a45;}
+@keyframes skinPulse{50%{transform:scale(1.08);opacity:.8}}
 </style>
 </head>
 
@@ -551,10 +501,10 @@ button{
 
 </div>
 
-<div id="orientationHint" aria-live="polite">
-    <div class="rotateIcon">📱↪️</div>
-    <div>Hãy xoay điện thoại sang <b>màn hình ngang</b> để chơi</div>
-    <div style="font-size:14px;font-weight:500;opacity:.75">Game sẽ tự xin chế độ toàn màn hình khi bạn bấm Chơi lại.</div>
+<div id="orientationChoice" aria-label="Chọn kiểu màn hình chơi">
+    <span>📱 Chọn cách chơi:</span>
+    <button id="rotateScreenButton" type="button">↔️ Chơi ngang</button>
+    <button id="portraitScreenButton" type="button">↕️ Chơi đứng</button>
 </div>
 
 <div id="shopPanel" aria-hidden="true">
@@ -1131,7 +1081,7 @@ function renderShop(){
         const card = document.createElement("div");
         card.className = "skinCard";
         card.innerHTML = `
-            <div class="skinPreview">${skin.icon}</div>
+            <div class="skinPreview skin-${skin.id}">${skin.icon}</div>
             <div class="skinName">${skin.name}</div>
             <div class="skinPrice">${skin.desc}<br>${skin.price === 0 ? "Miễn phí" : "🪙 " + skin.price + " Xu"}</div>
         `;
@@ -1213,6 +1163,7 @@ let bombs = [];
 let fruits = [];
 let bullets = [];
 let particles = [];
+let coinPopups = [];
 
 
 /* =====================================================
@@ -1745,6 +1696,16 @@ function killEnemy(index){
     coins += 1;
     saveCoins();
     updateCoinsUI();
+
+    // 🪙 Hiện xu bay lên ngay tại vị trí quái vừa bị hạ.
+    coinPopups.push({
+        x: e.x,
+        y: e.y - 8,
+        life: 1.0,
+        vy: -42,
+        drift: (Math.random() - 0.5) * 18
+    });
+
     playSfx("enemy");
 }
 
@@ -2682,6 +2643,18 @@ function updateParticles(dt){
 
             particles.splice(i,1);
         }
+    }
+}
+
+
+function updateCoinPopups(dt){
+    for(let i=coinPopups.length-1;i>=0;i--){
+        const c=coinPopups[i];
+        c.y += c.vy*dt;
+        c.x += c.drift*dt;
+        c.vy += 10*dt;
+        c.life -= dt;
+        if(c.life <= 0) coinPopups.splice(i,1);
     }
 }
 
@@ -3646,6 +3619,67 @@ function draw(){
     }
 
     /*
+       ✨ HIỆU ỨNG SKIN NÂNG CẤP — mọi skin đều có hào quang riêng,
+       vòng năng lượng và hạt chuyển động để nhìn nổi bật hơn.
+    */
+    if(player){
+        ctx.save();
+        const t=performance.now()/1000;
+        const skinFx={
+            neon:{main:"#42eaff", glow:"#8fffff", ring:"rgba(66,234,255,.72)"},
+            fire:{main:"#ff4a12", glow:"#ffe66a", ring:"rgba(255,82,18,.72)"},
+            ice:{main:"#5fe9ff", glow:"#ffffff", ring:"rgba(95,233,255,.72)"},
+            leaf:{main:"#55df76", glow:"#dfff8a", ring:"rgba(85,223,118,.70)"},
+            octopus:{main:"#b85cff", glow:"#f3b7ff", ring:"rgba(184,92,255,.72)"},
+            devil:{main:"#ff234d", glow:"#ff9b4a", ring:"rgba(255,35,77,.72)"}
+        };
+        const fx=skinFx[selectedSkin] || skinFx.neon;
+
+        ctx.globalCompositeOperation="lighter";
+        ctx.shadowBlur=18;
+        ctx.shadowColor=fx.main;
+        ctx.strokeStyle=fx.ring;
+        ctx.lineWidth=2.5;
+        ctx.beginPath();
+        ctx.arc(player.x,player.y,31+Math.sin(t*4)*2, t, t+Math.PI*1.55);
+        ctx.stroke();
+        ctx.strokeStyle="rgba(255,255,255,.55)";
+        ctx.beginPath();
+        ctx.arc(player.x,player.y,35+Math.sin(t*3+1)*2, -t*.8, -t*.8+Math.PI*1.1);
+        ctx.stroke();
+
+        for(let i=0;i<10;i++){
+            const a=t*(1.2+(i%3)*.18)+i*Math.PI*2/10;
+            const r=34+Math.sin(t*3+i)*4;
+            const x=player.x+Math.cos(a)*r;
+            const y=player.y+Math.sin(a)*r;
+            const rr=1.4+(i%3)*.7;
+            ctx.fillStyle=i%2?fx.main:fx.glow;
+            ctx.beginPath(); ctx.arc(x,y,rr,0,Math.PI*2); ctx.fill();
+        }
+        ctx.globalCompositeOperation="source-over";
+        ctx.restore();
+    }
+
+    /*
+       🪙 XU RƠI RA KHI HẠ QUÁI
+    */
+    for(const c of coinPopups){
+        ctx.save();
+        ctx.globalAlpha=Math.max(0,c.life);
+        ctx.textAlign="center";
+        ctx.font="bold 18px Arial";
+        ctx.shadowColor="#ffd83d";
+        ctx.shadowBlur=12;
+        ctx.fillStyle="#fff4a3";
+        ctx.fillText("+1 🪙",c.x,c.y);
+        ctx.font="bold 11px Arial";
+        ctx.fillStyle="#ffd83d";
+        ctx.fillText("XU",c.x,c.y+13);
+        ctx.restore();
+    }
+
+    /*
        BULLETS — đổi ngoại hình theo skin
     */
     for(const b of bullets){
@@ -4375,6 +4409,7 @@ function gameLoop(now){
     updateBullets(dt);
 
     updateParticles(dt);
+    updateCoinPopups(dt);
     cleanupOffscreen();
 
 
@@ -4404,10 +4439,11 @@ function gameLoop(now){
 
 
 /* =====================================================
-   CHẾ ĐỘ MÀN HÌNH NGANG / TOÀN MÀN HÌNH
+   CHỌN MÀN HÌNH NGANG HOẶC ĐỨNG
 ===================================================== */
 
 async function requestLandscapeMode(){
+    /* Chỉ đổi sang ngang khi người chơi chủ động bấm nút. */
     try{
         if(document.documentElement.requestFullscreen && !document.fullscreenElement){
             await document.documentElement.requestFullscreen();
@@ -4415,10 +4451,37 @@ async function requestLandscapeMode(){
     }catch(error){}
 
     try{
-        if(screen.orientation && screen.orientation.lock){
+        if(screen.orientation && typeof screen.orientation.lock === "function"){
             await screen.orientation.lock("landscape");
         }
     }catch(error){}
+}
+
+async function requestPortraitMode(){
+    /* Chế độ đứng không cần ép xoay; chỉ thoát fullscreen nếu đang ở fullscreen. */
+    try{
+        if(document.fullscreenElement && document.exitFullscreen){
+            await document.exitFullscreen();
+        }
+    }catch(error){}
+}
+
+const rotateScreenButton = document.getElementById("rotateScreenButton");
+if(rotateScreenButton){
+    rotateScreenButton.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        requestLandscapeMode();
+    });
+}
+
+const portraitScreenButton = document.getElementById("portraitScreenButton");
+if(portraitScreenButton){
+    portraitScreenButton.addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        requestPortraitMode();
+    });
 }
 
 /* =====================================================
@@ -4426,8 +4489,6 @@ async function requestLandscapeMode(){
 ===================================================== */
 
 function startGame(){
-
-    requestLandscapeMode();
 
     if(soundEnabled) unlockAudio();
     playSfx("start");
